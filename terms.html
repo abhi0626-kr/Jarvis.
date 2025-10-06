@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions - Jarvis E-commerce</title>
+    <link rel="icon" type="image/png" href="top.jpg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Reuse the same styles from index.html */
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #333;
+            --light-color: #f5f5f5;
+            --dark-color: #222;
+            --text-color: #333;
+            --text-light: #666;
+            --white: #fff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header Styles (same as index.html) */
+        header {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-bar {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo h1 {
+            color: var(--primary-color);
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .search-bar {
+            display: flex;
+            margin: 0 20px;
+            flex-grow: 0.5;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-bar button {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-actions a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            padding: 15px 0;
+        }
+
+        nav ul li {
+            margin-right: 100px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+        /* Terms & Conditions Page Specific Styles */
+        .terms-section {
+            padding: 60px 0;
+        }
+
+        .terms-content {
+            background-color: var(--white);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .terms-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 32px;
+            text-align: center;
+        }
+
+        .terms-content h3 {
+            margin: 30px 0 15px;
+            color: var(--secondary-color);
+            font-size: 22px;
+        }
+
+        .terms-content p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        .terms-content ul {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        .terms-content ul li {
+            margin-bottom: 10px;
+        }
+
+        .last-updated {
+            font-style: italic;
+            color: var(--text-light);
+            text-align: right;
+            margin-top: 30px;
+        }
+
+        /* Footer Styles (same as index.html) */
+        footer {
+            background-color: var(--dark-color);
+            color: var(--white);
+            padding: 50px 0 0;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-col h3 {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .copyright {
+            border-top: 1px solid #444;
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            nav ul li {
+                margin-right: 50px;
+            }
+
+            .terms-content {
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            nav ul li {
+                margin-right: 30px;
+            }
+
+            .terms-content h2 {
+                font-size: 28px;
+            }
+
+            .terms-content h3 {
+                font-size: 20px;
+            }
+        }
+
+        .logo h1 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+
+        /* Mobile User Actions */
+        .user-actions .desktop-text {
+            display: inline;
+        }
+
+        .user-actions .mobile-icon {
+            display: none;
+            font-size: 20px;
+        }
+
+        /* Mobile Menu Styles */
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--secondary-color);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            width: 200px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-menu a:hover {
+            background-color: #f5f5f5;
+            color: var(--primary-color);
+        }
+
+        /* Active nav state */
+        nav ul li.active a {
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        nav ul li.active a:after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        /* Loading and error states */
+        .loading,
+        .no-products,
+        .error,
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+            grid-column: 1 / -1;
+        }
+
+        /* Responsive User Actions */
+        @media (max-width: 768px) {
+            .user-actions .desktop-text {
+                display: none;
+            }
+
+            .user-actions .mobile-icon {
+                display: inline-block;
+            }
+
+            .user-actions a {
+                padding: 8px;
+                font-size: 18px;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            nav ul {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav .container {
+                display: block !important;
+                overflow-x: auto !important;
+                white-space: nowrap !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+
+            nav ul {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                padding-bottom: 10px !important;
+            }
+
+            nav ul li {
+                margin-right: 30px !important;
+                flex-shrink: 0 !important;
+            }
+
+            /* Hide mobile menu elements since we don't need them */
+            .menu-toggle,
+            .mobile-menu {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="top-bar">
+            <div class="container">
+                <div class="logo">
+                    <h1><img src="logo.jpg" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"
+                            alt="Jarvis Logo"> Jarvis</h1>
+                </div>
+                <div class="search-bar">
+                    <input type="text" placeholder="Search for products...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+                <div class="user-actions">
+                    <a href="home.html">
+                        <i class="fas fa-home mobile-icon"></i>
+                        <span class="desktop-text">Home</span>
+                    </a>
+
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- <nav>
+            <div class="container">
+                <ul>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="electronics.html">Electronics</a></li>
+                    <li><a href="fashion.html">Fashion</a></li>
+                    <li><a href="home-kitchen.html">Home & Kitchen</a></li>
+                    <li><a href="groceries.html">Groceries</a></li>
+                    <li><a href="beauty.html">Beauty</a></li>
+                    <li><a href="offers.html">Offers</a></li>
+                </ul>
+            </div>
+        </nav> -->
+    </header>
+
+    <main>
+        <section class="terms-section">
+            <div class="container">
+                <div class="terms-content">
+                    <h2>Terms & Conditions</h2>
+                    <p class="last-updated">Last Updated: January 1, 2025</p>
+
+                    <p>Welcome to Jarvis E-commerce! These Terms & Conditions govern your use of our website and
+                        services. By accessing or using our website, you agree to be bound by these terms.</p>
+
+                    <h3>1. General Terms</h3>
+                    <p>By accessing and placing an order with Jarvis E-commerce, you confirm that you are at least 18
+                        years of age or have the consent of a legal guardian. You agree not to use our products or
+                        services for any illegal or unauthorized purpose.</p>
+
+                    <h3>2. Account Registration</h3>
+                    <p>To access certain features, you may need to register an account. You are responsible for
+                        maintaining the confidentiality of your account credentials and for all activities that occur
+                        under your account.</p>
+
+                    <h3>3. Products and Pricing</h3>
+                    <p>We strive to display accurate product information, including descriptions, images, and prices.
+                        However, we cannot guarantee that all information is error-free. We reserve the right to correct
+                        any errors and to change or update information at any time.</p>
+                    <p>All prices are in Indian Rupees (₹) and are subject to change without notice. We are not
+                        responsible for typographical errors regarding price or product information.</p>
+
+                    <h3>4. Orders and Payment</h3>
+                    <p>By placing an order, you agree to pay the full amount including product price, taxes, and
+                        shipping fees. We accept various payment methods as displayed during checkout.</p>
+                    <p>We reserve the right to refuse or cancel any order for any reason, including but not limited to:
+                    </p>
+                    <ul>
+                        <li>Product availability</li>
+                        <li>Errors in product or pricing information</li>
+                        <li>Suspected fraudulent activity</li>
+                    </ul>
+
+                    <h3>5. Shipping and Delivery</h3>
+                    <p>Shipping times are estimates and not guaranteed. We are not responsible for delays caused by
+                        shipping carriers or unforeseen circumstances. Risk of loss passes to you upon delivery to the
+                        carrier.</p>
+
+                    <h3>6. Returns and Refunds</h3>
+                    <p>Our Return Policy is incorporated into these Terms. Please review our Return Policy for details
+                        about returns, exchanges, and refunds.</p>
+
+                    <h3>7. Intellectual Property</h3>
+                    <p>All content on this website, including text, graphics, logos, and images, is our property or the
+                        property of our licensors and is protected by copyright and other intellectual property laws.
+                    </p>
+
+                    <h3>8. User Conduct</h3>
+                    <p>You agree not to:</p>
+                    <ul>
+                        <li>Use the website for any unlawful purpose</li>
+                        <li>Post false, inaccurate, or misleading information</li>
+                        <li>Upload viruses or malicious code</li>
+                        <li>Collect information about other users</li>
+                        <li>Interfere with the proper functioning of the website</li>
+                    </ul>
+
+                    <h3>9. Limitation of Liability</h3>
+                    <p>To the fullest extent permitted by law, Jarvis E-commerce shall not be liable for any indirect,
+                        incidental, special, or consequential damages resulting from your use of or inability to use our
+                        website or services.</p>
+
+                    <h3>10. Governing Law</h3>
+                    <p>These Terms shall be governed by and construed in accordance with the laws of India. Any disputes
+                        shall be subject to the exclusive jurisdiction of the courts in Tamilnade.</p>
+
+                    <h3>11. Changes to Terms</h3>
+                    <p>We reserve the right to modify these Terms at any time. Changes will be effective immediately
+                        upon posting on the website. Your continued use of the website constitutes acceptance of the
+                        modified Terms.</p>
+
+                    <h3>12. Contact Information</h3>
+                    <p>For questions about these Terms, please contact us at:</p>
+                    <p>Email: legal@jarvis.com<br>
+                        Phone: +91 6383221055<br>
+                        Address: 123 Main Street, Tamilnade, India</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>About Jarvis</h3>
+                    <p>Jarvis is India's fastest growing e-commerce platform, offering best prices and fastest delivery
+                        across the country.</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="home.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="Customer.html">Contact</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Customer Service</h3>
+                    <ul>
+                        <li><a href="profile.html">My Account</a></li>
+                        <li><a href="Tracking.html">Order Tracking</a></li>
+                        <li><a href="profile.html">Wishlist</a></li>
+                        <li><a href="Customer.html">Customer Service</a></li>
+                        <li><a href="Tracking.html">Returns/Exchange</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 TPT, Tamilnadu, India</p>
+                    <p><i class="fas fa-phone"></i> +91 6383221055</p>
+                    <p><i class="fas fa-envelope"></i> spprtjarvis@gmail.com</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Jarvis E-commerce. All Rights Reserved.</p>
+                <div class="payment-methods">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-paypal"></i>
+                    <i class="fab fa-cc-amazon-pay"></i>
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple cart count functionality (same as index.html)
+        document.addEventListener('DOMContentLoaded', () => {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            document.getElementById('cart-count').textContent = cart.reduce((total, item) => total + item.quantity, 0);
+        });
+    </script>
+</body>
+
+</html>

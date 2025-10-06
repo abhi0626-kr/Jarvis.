@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JARVIS - Sign In / Sign Up</title>
+  <link rel="icon" type="image/png" href="top.jpg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <script type="module" src="firebase-config.js" defer></script>
+  <style>
+    /* Base Styles */
+    :root {
+      --primary-color: #ff6b6b;
+      --secondary-color: #333;
+      --light-color: #f5f5f5;
+      --dark-color: #222;
+      --text-color: #333;
+      --text-light: #666;
+      --white: #fff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+      color: var(--text-color);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn:hover {
+      background-color: #ff5252;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    /* Glass Effect Styles */
+    .glass3d {
+      --filter-glass3d: blur(32px) brightness(1.14) saturate(3);
+      --color-glass3d: hsl(0 0% 75% / 0.15);
+      --noise-glass3d: url("https://www.transparenttextures.com/patterns/cartographer.png");
+
+      position: relative;
+      z-index: 4;
+      box-shadow:
+        0 0 0.75px hsl(205 20% 10% / 0.2),
+        0.7px 0.8px 1.2px -0.4px hsl(205 20% 10% / 0.1),
+        1.3px 1.5px 2.2px -0.8px hsl(205 20% 10% / 0.1),
+        2.3px 2.6px 3.9px -1.2px hsl(205 20% 10% / 0.1),
+        3.9px 4.4px 6.6px -1.7px hsl(205 20% 10% / 0.1),
+        6.5px 7.2px 10.9px -2.1px hsl(205 20% 10% / 0.1),
+        8px 9px 14px -2.5px hsl(205 20% 10% / 0.2);
+    }
+
+    .glass3d::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      overflow: hidden;
+      z-index: 3;
+
+      -webkit-backdrop-filter: var(--filter-glass3d);
+      backdrop-filter: var(--filter-glass3d);
+      background-color: var(--color-glass3d);
+      background-image: var(--noise-glass3d);
+      background-size: 100px;
+      background-repeat: repeat;
+    }
+
+    .glass3d::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      overflow: hidden;
+      z-index: 5;
+
+      box-shadow:
+        inset 2px 2px 1px -3px hsl(205 20% 90% / 0.8),
+        inset 4px 4px 2px -6px hsl(205 20% 90% / 0.3),
+        inset 1.5px 1.5px 1.5px -0.75px hsl(205 20% 90% / 0.15),
+        inset 1.5px 1.5px 0.25px hsl(205 20% 90% / 0.03),
+        inset 0 0 0.25px 0.5px hsl(205 20% 90% / 0.03);
+    }
+
+    .glass3d>* {
+      position: relative;
+      z-index: 6;
+    }
+
+    /* Auth Container */
+    .auth-container {
+      display: flex;
+      width: 100%;
+      max-width: 900px;
+      min-height: 550px;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    /* Auth Form */
+    .auth-form {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 20px 0 0 20px;
+    }
+
+    .auth-form.glass3d {
+      border-radius: 20px;
+    }
+
+    .auth-form h2 {
+      color: var(--white);
+      font-size: 2rem;
+      margin-bottom: 30px;
+      text-align: center;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--white);
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+    }
+
+    .form-group input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .form-group .input-icon {
+      position: absolute;
+      right: 15px;
+      top: 40px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .remember-forgot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+    }
+
+    .remember-me input {
+      margin-right: 8px;
+    }
+
+    .remember-me label {
+      color: var(--white);
+      margin-bottom: 0;
+    }
+
+    .forgot-password {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    .btn-submit {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .social-login {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .social-login p {
+      color: var(--white);
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .social-login p::before,
+    .social-login p::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 30%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .social-login p::before {
+      left: 0;
+    }
+
+    .social-login p::after {
+      right: 0;
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--white);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .social-icon:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-3px);
+    }
+
+    .auth-switch {
+      text-align: center;
+      color: var(--white);
+    }
+
+    .auth-switch a {
+      color: var(--white);
+      font-weight: 600;
+      text-decoration: none;
+      margin-left: 5px;
+    }
+
+    .auth-switch a:hover {
+      text-decoration: underline;
+    }
+
+    /* Auth Banner */
+    .auth-banner {
+      flex: 1;
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.8), rgba(255, 154, 158, 0.8));
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: var(--white);
+      border-radius: 0 20px 20px 0;
+    }
+
+    .auth-banner h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .auth-banner p {
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .auth-banner .btn {
+      background: transparent;
+      border: 2px solid var(--white);
+      color: var(--white);
+      box-shadow: none;
+    }
+
+    .auth-banner .btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .auth-container {
+        flex-direction: column;
+      }
+
+      .auth-form {
+        border-radius: 20px 20px 0 0;
+      }
+
+      .auth-banner {
+        border-radius: 0 0 20px 20px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .auth-form {
+        padding: 30px 20px;
+      }
+
+      .auth-banner {
+        padding: 30px 20px;
+      }
+
+      .auth-banner h2 {
+        font-size: 2rem;
+      }
+    }
+
+    /* Toggle between Sign In and Sign Up */
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 30px;
+      border-radius: 30px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      color: var(--white);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .auth-tab.active {
+      background: var(--primary-color);
+    }
+
+    /* Hidden forms */
+    .form-container {
+      display: none;
+    }
+
+    .form-container.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .messageDiv {
+      background-color: #ff5252;
+      color: #f5f5f5;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 5px;
+      font-size: 1rem;
+      opacity: 0;
+      animation: fadeOut 7s forwards;
+    }
+
+    /* Profile sections */
+    .profile-section {
+      display: none;
+      margin-top: 30px;
+    }
+
+    .profile-section.active {
+      display: block;
+    }
+
+    .order-history,
+    .saved-addresses {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Mobile User Actions */
+    .user-actions .desktop-text {
+      display: inline;
+    }
+
+    .user-actions .mobile-icon {
+      display: none;
+      font-size: 20px;
+    }
+
+    /* Mobile Menu Styles */
+    .menu-toggle {
+      display: none;
+      cursor: pointer;
+      padding: 10px;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background-color: var(--secondary-color);
+      margin: 5px 0;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      width: 200px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .mobile-menu.active {
+      display: block;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 20px;
+      color: var(--secondary-color);
+      text-decoration: none;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-menu a:hover {
+      background-color: #f5f5f5;
+      color: var(--primary-color);
+    }
+
+    /* Active nav state */
+    nav ul li.active a {
+      color: var(--primary-color);
+      position: relative;
+    }
+
+    nav ul li.active a:after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary-color);
+    }
+
+    /* Loading and error states */
+    .loading,
+    .no-products,
+    .error,
+    .empty-cart {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 18px;
+      grid-column: 1 / -1;
+    }
+
+    /* Responsive User Actions */
+    @media (max-width: 768px) {
+      .user-actions .desktop-text {
+        display: none;
+      }
+
+      .user-actions .mobile-icon {
+        display: inline-block;
+      }
+
+      .user-actions a {
+        padding: 8px;
+        font-size: 18px;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      nav ul {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav .container {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      nav ul {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        padding-bottom: 10px !important;
+      }
+
+      nav ul li {
+        margin-right: 30px !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Hide mobile menu elements since we don't need them */
+      .menu-toggle,
+      .mobile-menu {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="auth-container glass3d">
+      <div class="auth-form">
+        <div class="auth-tabs">
+          <div class="auth-tab active" data-tab="signin">Sign In</div>
+          <div class="auth-tab" data-tab="signup">Sign Up</div>
+        </div>
+
+        <!-- Sign In Form -->
+        <div id="signin-form" class="form-container active">
+          <h2>Welcome Back</h2>
+          <form id="signinForm">
+            <div id="signIpMessage" class="messageDiv" style="display: none;"></div>
+            <div class="form-group">
+              <label for="signin-email">Email</label>
+              <input type="email" id="signin-email" placeholder="Enter your email">
+              <i class="fas fa-envelope input-icon"></i>
+            </div>
+            <div class="form-group">
+              <label for="signin-password">Password</label>
+              <input type="password" id="signin-password" placeholder="Enter your password"
+                autocomplete="current-password">
+              <i class="fas fa-lock input-icon"></i>
+            </div>
+            <div class="remember-forgot">
+              <div class="remember-me">
+                <input type="checkbox" id="remember-me">
+                <label for="remember-me">Remember me</label>
+              </div>
+              <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+            <button id="signin-submit" class="btn btn-submit">Sign In</button>
+
+            <div class="social-login">
+              <p>Or sign in with</p>
+              <div class="social-icons">
+                <a href="#" class="social-icon" id="google-signin"><i class="fab fa-google"></i></a>
+                <a href="#" class="social-icon" id="facebook-signin"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-icon" id="github-signin"><i class="fab fa-github" aria-hidden="true"></i></a>
+              </div>
+            </div>
+
+            <div class="auth-switch">
+              Don't have an account? <a href="#" class="switch-to-signup">Sign Up</a>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sign Up Form -->
+        <div id="signup-form" class="form-container">
+          <h2>Create Account</h2>
+          <form id="signupForm">
+            <div id="signUpMessage" class="messageDiv" style="display: none;"></div>
+            <div class="form-group">
+              <label for="signup-name">Full Name</label>
+              <input type="text" id="signup-name" placeholder="Enter your full name">
+              <i class="fas fa-user input-icon"></i>
+            </div>
+            <div class="form-group">
+              <label for="signup-email">Email</label>
+              <input type="email" id="signup-email" placeholder="Enter your email">
+              <i class="fas fa-envelope input-icon"></i>
+            </div>
+            <div class="form-group">
+              <label for="signup-password">Password</label>
+              <input type="password" id="signup-password" placeholder="Create a password" autocomplete="new-password">
+              <i class="fas fa-lock input-icon"></i>
+            </div>
+            <div class="form-group">
+              <label for="signup-confirm-password">Confirm Password</label>
+              <input type="password" id="signup-confirm-password" placeholder="Confirm your password"
+                autocomplete="new-password">
+              <i class="fas fa-lock input-icon"></i>
+            </div>
+            <button id="signup-submit" type="submit" class="btn btn-submit">Sign Up</button>
+
+            <div class="social-login">
+              <p>Or sign up with</p>
+              <div class="social-icons">
+                <a href="#" class="social-icon" id="google-signup"><i class="fab fa-google"></i></a>
+                <a href="#" class="social-icon" id="facebook-signup"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-icon" id="github-signup"><i class="fab fa-github" aria-hidden="true"></i></a>
+              </div>
+            </div>
+
+            <div class="auth-switch">
+              Already have an account? <a href="#" class="switch-to-signin">Sign In</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="auth-banner">
+        <h2>Welcome to JARVIS</h2>
+        <p>Your personal AI assistant for all your needs. Sign in to access your personalized dashboard, order history,
+          and saved preferences.</p>
+        <!-- <a href="index.html" class="btn">Learn More</a> -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM elements
+    const signInForm = document.getElementById('signin-form');
+    const signUpForm = document.getElementById('signup-form');
+    const signInTab = document.querySelector('[data-tab="signin"]');
+    const signUpTab = document.querySelector('[data-tab="signup"]');
+    const switchToSignUp = document.querySelector('.switch-to-signup');
+    const switchToSignIn = document.querySelector('.switch-to-signin');
+    const signIpMessage = document.getElementById('signIpMessage');
+    const signUpMessage = document.getElementById('signUpMessage');
+
+    // Switch between sign in and sign up
+    signInTab.addEventListener('click', () => {
+      signInTab.classList.add('active');
+      signUpTab.classList.remove('active');
+      signInForm.classList.add('active');
+      signUpForm.classList.remove('active');
+    });
+
+    signUpTab.addEventListener('click', () => {
+      signUpTab.classList.add('active');
+      signInTab.classList.remove('active');
+      signUpForm.classList.add('active');
+      signInForm.classList.remove('active');
+    });
+
+    switchToSignUp.addEventListener('click', (e) => {
+      e.preventDefault();
+      signUpTab.click();
+    });
+
+    switchToSignIn.addEventListener('click', (e) => {
+      e.preventDefault();
+      signInTab.click();
+    });
+
+    // Form submission
+    document.getElementById('signin-submit').addEventListener('click', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signin-email').value;
+      const password = document.getElementById('signin-password').value;
+      signInWithEmail(email, password);
+    });
+
+    document.getElementById('signup-submit').addEventListener('click', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('signup-name').value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+      if (password !== confirmPassword) {
+        showMessage(signUpMessage, "Passwords don't match");
+        return;
+      }
+
+      signUpWithEmail(name, email, password);
+    });
+
+    // Social authentication
+    document.getElementById('google-signin').addEventListener('click', (e) => {
+      e.preventDefault();
+      signInWithGoogle();
+    });
+
+    document.getElementById('facebook-signin').addEventListener('click', (e) => {
+      e.preventDefault();
+      signInWithFacebook();
+    });
+
+    document.getElementById('github-signin').addEventListener('click', (e) => {
+      e.preventDefault();
+      signInWithGitHub();
+    });
+
+    document.getElementById('google-signup').addEventListener('click', (e) => {
+      e.preventDefault();
+      signInWithGoogle();
+    });
+
+    document.getElementById('facebook-signup').addEventListener('click', (e) => {
+      e.preventDefault();
+      signInWithFacebook();
+    });
+
+    document.getElementById('github-signup').addEventListener('click', (e) => {
+      e.preventDefault();
+      signInWithGitHub();
+    });
+
+    // Firebase functions (to be implemented in firebase-config.js)
+    function signInWithEmail(email, password) {
+      // This will be implemented in firebase-config.js
+      console.log('Sign in with:', email, password);
+      showMessage(signIpMessage, "Fetching user data");
+    }
+
+    function signUpWithEmail(name, email, password) {
+      // This will be implemented in firebase-config.js
+      console.log('Sign up with:', name, email, password);
+      showMessage(signUpMessage, "Checking Account info");
+    }
+
+    function signInWithGoogle() {
+      // This will be implemented in firebase-config.js
+      console.log('Sign in with Google');
+      showMessage(signIpMessage, "Google sign in will be implement");
+    }
+
+    function signInWithFacebook() {
+      // This will be implemented in firebase-config.js
+      console.log('Sign in with Facebook');
+      showMessage(signIpMessage, "Facebook sign in will be implement");
+    }
+
+    function signInWithGitHub() {
+      // This will be implemented in firebase-config.js
+      console.log('Sign in with GitHub');
+      showMessage(signIpMessage, "GitHub sign in will be implement");
+    }
+
+
+    function showMessage(element, message) {
+      element.textContent = message;
+      element.style.display = 'block';
+      element.style.opacity = '1';
+
+      setTimeout(() => {
+        element.style.opacity = '0';
+        setTimeout(() => {
+          element.style.display = 'none';
+        }, 1000);
+      }, 5000);
+    }
+  </script>
+</body>
+
+</html>

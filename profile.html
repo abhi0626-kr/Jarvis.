@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JARVIS - My Profile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Firebase SDK (updated to latest version) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    /* Base Styles */
+    :root {
+      --primary-color: #ff6b6b;
+      --secondary-color: #333;
+      --light-color: #f5f5f5;
+      --dark-color: #222;
+      --text-color: #333;
+      --text-light: #666;
+      --white: #fff;
+      --success-color: #4caf50;
+      --error-color: #f44336;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--light-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #ff5252;
+    }
+
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Header Styles */
+    header {
+      background-color: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .top-bar {
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo h1 {
+      color: var(--primary-color);
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .user-actions a {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .user-actions a:hover {
+      color: var(--primary-color);
+    }
+
+    .user-actions .cart {
+      position: relative;
+    }
+
+    .user-actions .cart #cart-count {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background-color: var(--primary-color);
+      color: var(--white);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    /* Profile Page Styles */
+    .profile-container {
+      padding: 40px 0;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      flex-wrap: wrap;
+    }
+
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: white;
+      margin-right: 30px;
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-info h2 {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .profile-info p {
+      color: var(--text-light);
+      margin-bottom: 15px;
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-light);
+    }
+
+    .profile-content {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 30px;
+    }
+
+    .profile-sidebar {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    .profile-nav {
+      list-style: none;
+    }
+
+    .profile-nav li {
+      margin-bottom: 10px;
+    }
+
+    .profile-nav a {
+      display: block;
+      padding: 12px 15px;
+      color: var(--secondary-color);
+      text-decoration: none;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    .profile-nav a:hover,
+    .profile-nav a.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .profile-nav a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .profile-main {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+
+    .profile-tab {
+      display: none;
+    }
+
+    .profile-tab.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* Cart Sidebar Styles */
+    .cart-sidebar {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 400px;
+      height: 100%;
+      background-color: var(--white);
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: right 0.3s;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .cart-sidebar.active {
+      right: 0;
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .close-cart {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .cart-items {
+      padding: 20px;
+    }
+
+    .cart-item {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+    }
+
+    .cart-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      margin-right: 15px;
+      border-radius: 4px;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-info h4 {
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .cart-item-info .price {
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    .cart-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cart-item-actions button {
+      background-color: #f5f5f5;
+      border: none;
+      width: 25px;
+      height: 25px;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+
+    .cart-item-actions .quantity {
+      margin: 0 5px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .remove-item {
+      color: var(--primary-color);
+      background: none !important;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .cart-total {
+      padding: 20px;
+      border-top: 1px solid #eee;
+      text-align: right;
+    }
+
+    .cart-total p {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    /* Address Card Styles */
+    .address-card {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .address-card.default {
+      border-color: var(--primary-color);
+      background-color: #fff5f5;
+    }
+
+    .address-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .address-name {
+      font-weight: bold;
+    }
+
+    .default-badge {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .address-details p {
+      margin-bottom: 5px;
+    }
+
+    .address-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .address-actions .btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    /* Order Styles */
+    .order-card {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .order-id {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .order-date {
+      color: var(--text-light);
+    }
+
+    .order-status {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .order-status.delivered {
+      background-color: #e6f7ee;
+      color: #00a65a;
+    }
+
+    .order-status.processing {
+      background-color: #e6f0ff;
+      color: #1890ff;
+    }
+
+    .order-status.shipped {
+      background-color: #fff7e6;
+      color: #fa8c16;
+    }
+
+    .order-items {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      overflow-x: auto;
+    }
+
+    .order-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 80px;
+    }
+
+    .order-item img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+
+    .order-item-name {
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+
+    .order-total {
+      font-weight: bold;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .address-modal {
+      background-color: white;
+      border-radius: 8px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+
+    .close-modal:hover {
+      color: var(--primary-color);
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 20px;
+      padding: 0 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .form-group input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      padding: 0 20px;
+      margin-bottom: 20px;
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .success-message {
+      color: var(--success-color);
+      font-size: 14px;
+      margin: 10px 20px;
+      display: none;
+    }
+
+    .save-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      width: calc(100% - 40px);
+      margin: 0 20px 20px;
+    }
+
+    .save-btn:hover {
+      background-color: #ff5252;
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary-color);
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Wishlist Styles */
+    .wishlist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .wishlist-item {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+
+    .wishlist-item:hover {
+      transform: translateY(-5px);
+    }
+
+    .wishlist-item img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .wishlist-info {
+      padding: 15px;
+    }
+
+    .wishlist-info h4 {
+      margin-bottom: 10px;
+    }
+
+    .wishlist-price {
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    .wishlist-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .wishlist-actions .btn {
+      flex: 1;
+      padding: 8px;
+      font-size: 12px;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+      .profile-content {
+        grid-template-columns: 1fr;
+      }
+
+      .cart-sidebar {
+        width: 350px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .profile-header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .profile-avatar {
+        margin-right: 0;
+        margin-bottom: 20px;
+      }
+
+      .profile-stats {
+        justify-content: center;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .address-modal {
+        width: 95%;
+      }
+
+      .cart-sidebar {
+        width: 100%;
+      }
+    }
+
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 4px;
+      color: white;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    .notification.success {
+      background-color: var(--success-color);
+    }
+
+    .notification.error {
+      background-color: var(--error-color);
+    }
+
+    .notification.show {
+      opacity: 1;
+    }
+
+    /* Empty state styles */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-light);
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      margin-bottom: 10px;
+      color: var(--text-color);
+    }
+
+    .empty-state p {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="top-bar">
+      <div class="container">
+        <div class="logo">
+          <h1>JARVIS</h1>
+        </div>
+        <div class="user-actions">
+          <a href="home.html"><i class="fas fa-home"></i> Home</a>
+          <a href="cart.html" class="cart" id="cart-link"><i class="fas fa-shopping-cart"></i> Cart <span id="cart-count">0</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container profile-container">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profile-avatar">U</div>
+      <div class="profile-info">
+        <h2 id="profile-name">User Name</h2>
+        <p id="profile-email">user@example.com</p>
+        <div class="profile-stats">
+          <div class="stat-item">
+            <div class="stat-value" id="orders-count">0</div>
+            <div class="stat-label">Orders</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="wishlist-count">0</div>
+            <div class="stat-label">Wishlist</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="addresses-count">0</div>
+            <div class="stat-label">Addresses</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-content">
+      <div class="profile-sidebar">
+        <ul class="profile-nav">
+          <li><a href="#" class="active" data-tab="orders"><i class="fas fa-shopping-bag"></i> My Orders</a></li>
+          <li><a href="#" data-tab="addresses"><i class="fas fa-map-marker-alt"></i> My Addresses</a></li>
+          <li><a href="#" data-tab="wishlist"><i class="fas fa-heart"></i> My Wishlist</a></li>
+          <li><a href="#" data-tab="profile"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
+          <li><a href="index.html" id="sidebar-logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+      </div>
+
+      <div class="profile-main">
+        <!-- Orders Tab -->
+        <div class="profile-tab active" id="orders-tab">
+          <h2 class="section-title">My Orders</h2>
+          <div id="orders-container">
+            <div class="empty-state">
+              <i class="fas fa-shopping-bag"></i>
+              <h3>Loading Orders...</h3>
+              <p>Please wait while we fetch your order history.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Addresses Tab -->
+        <div class="profile-tab" id="addresses-tab">
+          <h2 class="section-title">My Addresses</h2>
+          <button class="btn" id="add-address-btn">
+            <i class="fas fa-plus"></i> Add New Address
+          </button>
+          <div id="addresses-container" class="addresses-list">
+            <div class="empty-state">
+              <i class="fas fa-map-marker-alt"></i>
+              <h3>No addresses found</h3>
+              <p>Add your first address to get started with deliveries.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wishlist Tab -->
+        <div class="profile-tab" id="wishlist-tab">
+          <h2 class="section-title">My Wishlist</h2>
+          <div class="wishlist-grid" id="wishlist-container">
+            <div class="empty-state">
+              <i class="fas fa-heart"></i>
+              <h3>Loading Wishlist...</h3>
+              <p>Please wait while we fetch your saved items.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Settings Tab -->
+        <div class="profile-tab" id="profile-tab">
+          <h2 class="section-title">Profile Settings</h2>
+          <form id="profile-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="first-name">First Name</label>
+                <input type="text" id="first-name" required>
+              </div>
+              <div class="form-group">
+                <label for="last-name">Last Name</label>
+                <input type="text" id="last-name" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" required readonly>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" placeholder="+91 9876543210">
+            </div>
+            <button type="submit" class="save-btn">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="close-cart" id="close-cart">&times;</button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <div class="empty-state">
+        <i class="fas fa-shopping-cart"></i>
+        <h3>Your cart is empty</h3>
+        <p>Add some items to get started!</p>
+      </div>
+    </div>
+    <div class="cart-total">
+      <p>Total: <span id="cart-total">₹0</span></p>
+      <button class="btn checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <!-- Address Modal -->
+  <div class="modal-overlay" id="address-modal-overlay">
+    <div class="address-modal">
+      <div class="modal-header">
+        <h3 id="address-modal-title">Add New Address</h3>
+        <button class="close-modal" id="close-address-modal">&times;</button>
+      </div>
+      <form id="address-form">
+        <input type="hidden" id="address-id">
+        
+        <div class="form-group">
+          <label for="address-name">Address Name (e.g., Home, Work)</label>
+          <input type="text" id="address-name" required placeholder="Home">
+          <div class="error-message" id="name-error"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="address-street">Street Address</label>
+          <input type="text" id="address-street" required placeholder="123 Main Street">
+          <div class="error-message" id="street-error"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="address-city">City</label>
+            <input type="text" id="address-city" required placeholder="Salem">
+            <div class="error-message" id="city-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="address-state">State</label>
+            <select id="address-state" required>
+              <option value="">Select State</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Gujarat">Gujarat</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+              <option value="West Bengal">West Bengal</option>
+              <option value="Bihar">Bihar</option>
+              <option value="Odisha">Odisha</option>
+              <option value="Madhya Pradesh">Madhya Pradesh</option>
+              <option value="Assam">Assam</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Haryana">Haryana</option>
+              <option value="Jharkhand">Jharkhand</option>
+              <option value="Chhattisgarh">Chhattisgarh</option>
+              <option value="Uttarakhand">Uttarakhand</option>
+              <option value="Himachal Pradesh">Himachal Pradesh</option>
+              <option value="Tripura">Tripura</option>
+              <option value="Meghalaya">Meghalaya</option>
+              <option value="Manipur">Manipur</option>
+              <option value="Nagaland">Nagaland</option>
+              <option value="Goa">Goa</option>
+              <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+              <option value="Mizoram">Mizoram</option>
+              <option value="Sikkim">Sikkim</option>
+              <option value="Telangana">Telangana</option>
+            </select>
+            <div class="error-message" id="state-error"></div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="address-zip">ZIP Code</label>
+            <input type="number" id="address-zip" required placeholder="636302">
+            <div class="error-message" id="zip-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="address-country">Country</label>
+            <select id="address-country" required>
+              <option value="India" selected>India</option>
+              <option value="United States">United States</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Canada">Canada</option>
+              <option value="Australia">Australia</option>
+            </select>
+            <div class="error-message" id="country-error"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address-phone">Phone Number</label>
+          <input type="number" id="address-phone" required placeholder="+91 9876543210">
+          <div class="error-message" id="phone-error"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="address-default">
+            <input type="checkbox" id="address-default">
+            Set as default address
+          </label>
+        </div>
+
+        <div class="error-message" id="form-error"></div>
+        <div class="success-message" id="form-success"></div>
+        
+        <button type="submit" class="save-btn" id="save-address-btn">
+          Save Address
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Container -->
+  <div class="notification" id="notification"></div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqXN_NjP3OUGhd-ah-hWTO66REtlMqwAk",
+      authDomain: "jarvis-e-commerce-a6563.firebaseapp.com",
+      projectId: "jarvis-e-commerce-a6563",
+      storageBucket: "jarvis-e-commerce-a6563.firebasestorage.app",
+      messagingSenderId: "998302088355",
+      appId: "1:998302088355:web:36279bf2694647baf05316",
+      measurementId: "G-Q9E7Z27L6K"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Global variables
+    let currentUser = null;
+    let userCart = [];
+    let userAddresses = [];
+    let userOrders = [];
+    let userWishlist = [];
+    let currentEditingAddressId = null;
+
+    // Firebase Collections
+    const COLLECTIONS = {
+      USERS: 'users',
+      CART: 'cart',
+      ORDERS: 'orders',
+      WISHLIST: 'wishlist',
+      ADDRESSES: 'addresses'
+    };
+
+    // DOM Elements
+    const cartSidebar = document.getElementById('cart-sidebar');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    const cartCount = document.getElementById('cart-count');
+    const cartLink = document.getElementById('cart-link');
+    const closeCartBtn = document.getElementById('close-cart');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    
+    const addressModal = document.getElementById('address-modal-overlay');
+    const addressForm = document.getElementById('address-form');
+    const addAddressBtn = document.getElementById('add-address-btn');
+    const closeModalBtn = document.getElementById('close-address-modal');
+    const addressModalTitle = document.getElementById('address-modal-title');
+    const saveAddressBtn = document.getElementById('save-address-btn');
+
+    const profileForm = document.getElementById('profile-form');
+    const saveBtn = profileForm.querySelector('.save-btn');
+
+    // ==================== UTILITY FUNCTIONS ====================
+
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = `notification ${type} show`;
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    function setLoadingState(element, isLoading, originalText = 'Save') {
+      if (isLoading) {
+        element.disabled = true;
+        element.innerHTML = '<div class="spinner"></div> Saving...';
+      } else {
+        element.disabled = false;
+        element.textContent = originalText;
+      }
+    }
+
+    function generateId() {
+      return Date.now().toString() + Math.random().toString(36).substr(2, 5);
+    }
+
+    // ==================== FIREBASE SYNC FUNCTIONS ====================
+
+    // Sync localStorage with Firebase on login
+    async function syncDataWithFirebase(userId) {
+      try {
+        // Sync cart
+        await syncCartWithFirebase(userId);
+        
+        // Load user data
+        await loadUserProfile(userId);
+        await loadUserAddresses(userId);
+        await loadUserOrders(userId);
+        await loadUserWishlist(userId);
+        
+        // Update UI
+        updateAllCounts();
+        renderCartItems();
+        renderAddresses();
+        renderOrders();
+        renderWishlist();
+        
+      } catch (error) {
+        console.error('Error syncing data with Firebase:', error);
+        showNotification('Error loading user data', 'error');
+      }
+    }
+
+    async function syncCartWithFirebase(userId) {
+      try {
+        // Get local cart from localStorage
+        const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        // Get Firebase cart
+        const firebaseCart = await getFirebaseCart(userId);
+        
+        // If local cart has items, sync with Firebase
+        if (localCart.length > 0) {
+          // Merge carts (local takes precedence)
+          const mergedCart = mergeCarts(localCart, firebaseCart);
+          
+          // Save merged cart to Firebase
+          await saveCartToFirebase(userId, mergedCart);
+          
+          // Update local storage
+          localStorage.setItem('cart', JSON.stringify(mergedCart));
+          userCart = mergedCart;
+        } else if (firebaseCart.length > 0) {
+          // Load Firebase cart to local
+          localStorage.setItem('cart', JSON.stringify(firebaseCart));
+          userCart = firebaseCart;
+        }
+        
+      } catch (error) {
+        console.error('Error syncing cart:', error);
+      }
+    }
+
+    function mergeCarts(localCart, firebaseCart) {
+      const merged = [...localCart];
+      
+      firebaseCart.forEach(firebaseItem => {
+        const existingItem = merged.find(item => item.id === firebaseItem.id);
+        if (!existingItem) {
+          merged.push(firebaseItem);
+        } else {
+          // Keep the higher quantity
+          existingItem.quantity = Math.max(existingItem.quantity, firebaseItem.quantity);
+        }
+      });
+      
+      return merged;
+    }
+
+    // ==================== CART FUNCTIONS ====================
+
+    async function getFirebaseCart(userId) {
+      try {
+        const cartRef = db.collection(COLLECTIONS.CART).where('userId', '==', userId);
+        const snapshot = await cartRef.get();
+        
+        const cartItems = [];
+        snapshot.forEach(doc => {
+          cartItems.push({
+            firebaseId: doc.id,
+            ...doc.data()
+          });
+        });
+        
+        return cartItems;
+      } catch (error) {
+        console.error('Error getting Firebase cart:', error);
+        return [];
+      }
+    }
+
+    async function saveCartToFirebase(userId, cartItems) {
+      try {
+        // Clear existing cart in Firebase
+        await clearFirebaseCart(userId);
+        
+        // Add new cart items
+        const batch = db.batch();
+        
+        cartItems.forEach(item => {
+          const cartRef = db.collection(COLLECTIONS.CART).doc();
+          batch.set(cartRef, {
+            ...item,
+            userId: userId,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+        
+        await batch.commit();
+        
+      } catch (error) {
+        console.error('Error saving cart to Firebase:', error);
+        throw error;
+      }
+    }
+
+    async function clearFirebaseCart(userId) {
+      try {
+        const cartRef = db.collection(COLLECTIONS.CART).where('userId', '==', userId);
+        const snapshot = await cartRef.get();
+        
+        const batch = db.batch();
+        snapshot.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        
+        await batch.commit();
+        
+      } catch (error) {
+        console.error('Error clearing Firebase cart:', error);
+      }
+    }
+
+    async function addToCart(product) {
+      try {
+        // Add to local cart
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const existingItem = cart.find(item => item.id === product.id);
+        
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          cart.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            quantity: 1
+          });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        userCart = cart;
+        
+        // Sync with Firebase if user is logged in
+        if (currentUser) {
+          await saveCartToFirebase(currentUser.uid, cart);
+        }
+        
+        updateCartCount();
+        renderCartItems();
+        showNotification(`${product.name} added to cart!`);
+        
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+        showNotification('Error adding item to cart', 'error');
+      }
+    }
+
+    async function updateCartItemQuantity(itemId, newQuantity) {
+      try {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        if (newQuantity <= 0) {
+          cart = cart.filter(item => item.id !== itemId);
+        } else {
+          const item = cart.find(item => item.id === itemId);
+          if (item) {
+            item.quantity = newQuantity;
+          }
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        userCart = cart;
+        
+        // Sync with Firebase
+        if (currentUser) {
+          await saveCartToFirebase(currentUser.uid, cart);
+        }
+        
+        updateCartCount();
+        renderCartItems();
+        
+      } catch (error) {
+        console.error('Error updating cart quantity:', error);
+        showNotification('Error updating cart', 'error');
+      }
+    }
+
+    async function removeFromCart(itemId) {
+      try {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        cart = cart.filter(item => item.id !== itemId);
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        userCart = cart;
+        
+        // Sync with Firebase
+        if (currentUser) {
+          await saveCartToFirebase(currentUser.uid, cart);
+        }
+        
+        updateCartCount();
+        renderCartItems();
+        showNotification('Item removed from cart');
+        
+      } catch (error) {
+        console.error('Error removing from cart:', error);
+        showNotification('Error removing item', 'error');
+      }
+    }
+
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+      cartCount.textContent = totalItems;
+    }
+
+    function renderCartItems() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Your cart is empty</h3>
+            <p>Add some items to get started!</p>
+          </div>
+        `;
+        cartTotal.textContent = '₹0';
+        return;
+      }
+      
+      cartItemsContainer.innerHTML = '';
+      let total = 0;
+      
+      cart.forEach(item => {
+        total += item.price * item.quantity;
+        
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        cartItem.innerHTML = `
+          <img src="${item.image}" alt="${item.name}">
+          <div class="cart-item-info">
+            <h4>${item.name}</h4>
+            <div class="price">₹${item.price.toLocaleString('en-IN')}</div>
+            <div class="cart-item-actions">
+              <button onclick="updateCartItemQuantity('${item.id}', ${item.quantity - 1})">-</button>
+              <span class="quantity">${item.quantity}</span>
+              <button onclick="updateCartItemQuantity('${item.id}', ${item.quantity + 1})">+</button>
+              <button class="remove-item" onclick="removeFromCart('${item.id}')">Remove</button>
+            </div>
+          </div>
+        `;
+        
+        cartItemsContainer.appendChild(cartItem);
+      });
+      
+      cartTotal.textContent = `₹${total.toLocaleString('en-IN')}`;
+    }
+
+    // ==================== ORDERS FUNCTIONS ====================
+
+    async function loadUserOrders(userId) {
+      try {
+        const ordersRef = db.collection(COLLECTIONS.ORDERS)
+          .where('userId', '==', userId)
+          .orderBy('createdAt', 'desc');
+        
+        const snapshot = await ordersRef.get();
+        
+        userOrders = [];
+        snapshot.forEach(doc => {
+          userOrders.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+        
+        return userOrders;
+        
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        return [];
+      }
+    }
+
+    async function createOrder(orderData) {
+      try {
+        if (!currentUser) {
+          throw new Error('User not authenticated');
+        }
+        
+        const order = {
+          ...orderData,
+          userId: currentUser.uid,
+          id: generateId(),
+          status: 'processing',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // Save order to Firebase
+        await db.collection(COLLECTIONS.ORDERS).doc(order.id).set(order);
+        
+        // Clear cart after successful order
+        localStorage.removeItem('cart');
+        userCart = [];
+        await clearFirebaseCart(currentUser.uid);
+        
+        // Reload orders
+        await loadUserOrders(currentUser.uid);
+        renderOrders();
+        updateAllCounts();
+        renderCartItems();
+        
+        return order;
+        
+      } catch (error) {
+        console.error('Error creating order:', error);
+        throw error;
+      }
+    }
+
+    function renderOrders() {
+      const container = document.getElementById('orders-container');
+      
+      if (userOrders.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-shopping-bag"></i>
+            <h3>No orders yet</h3>
+            <p>Your order history will appear here once you make your first purchase.</p>
+            <button class="btn" onclick="window.location.href='index.html'">Start Shopping</button>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = '';
+      
+      userOrders.forEach(order => {
+        const orderDate = order.createdAt?.toDate?.() ? 
+          order.createdAt.toDate().toLocaleDateString() : 
+          new Date().toLocaleDateString();
+        
+        const orderCard = document.createElement('div');
+        orderCard.className = 'order-card';
+        orderCard.innerHTML = `
+          <div class="order-header">
+            <div class="order-id">Order #${order.id.substring(0, 8)}</div>
+            <div class="order-date">${orderDate}</div>
+            <div class="order-status ${order.status}">${order.status}</div>
+          </div>
+          <div class="order-items">
+            ${order.items ? order.items.map(item => `
+              <div class="order-item">
+                <img src="${item.image}" alt="${item.name}">
+                <div class="order-item-name">${item.name}</div>
+              </div>
+            `).join('') : ''}
+          </div>
+          <div class="order-footer">
+            <div class="order-total">Total: ₹${order.total ? order.total.toLocaleString('en-IN') : '0'}</div>
+            <button class="btn" onclick="viewOrderDetails('${order.id}')">View Details</button>
+          </div>
+        `;
+        
+        container.appendChild(orderCard);
+      });
+    }
+
+    function viewOrderDetails(orderId) {
+      const order = userOrders.find(o => o.id === orderId);
+      if (order) {
+        alert(`Order Details:\nID: ${order.id}\nStatus: ${order.status}\nTotal: ₹${order.total}\nItems: ${order.items?.length || 0}`);
+      }
+    }
+
+    // ==================== ADDRESSES FUNCTIONS ====================
+
+    async function loadUserAddresses(userId) {
+      try {
+        const userDoc = await db.collection(COLLECTIONS.USERS).doc(userId).get();
+        
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          userAddresses = userData.addresses || [];
+        } else {
+          userAddresses = [];
+        }
+        
+        return userAddresses;
+        
+      } catch (error) {
+        console.error('Error loading addresses:', error);
+        return [];
+      }
+    }
+
+    async function saveAddressToFirebase(addressData) {
+      try {
+        if (!currentUser) {
+          throw new Error('User not authenticated');
+        }
+        
+        // If setting as default, remove default from other addresses
+        if (addressData.isDefault) {
+          userAddresses = userAddresses.map(addr => ({
+            ...addr,
+            isDefault: false
+          }));
+        }
+        
+        if (currentEditingAddressId) {
+          // Update existing address
+          const addressIndex = userAddresses.findIndex(addr => addr.id === currentEditingAddressId);
+          if (addressIndex !== -1) {
+            userAddresses[addressIndex] = { ...addressData, id: currentEditingAddressId };
+          }
+        } else {
+          // Add new address
+          addressData.id = generateId();
+          userAddresses.push(addressData);
+        }
+        
+        // Save to Firebase
+        await db.collection(COLLECTIONS.USERS).doc(currentUser.uid).set({
+          addresses: userAddresses,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        
+        return true;
+        
+      } catch (error) {
+        console.error('Error saving address:', error);
+        throw error;
+      }
+    }
+
+    async function deleteAddress(addressId) {
+      try {
+        if (!currentUser) return;
+        
+        userAddresses = userAddresses.filter(addr => addr.id !== addressId);
+        
+        await db.collection(COLLECTIONS.USERS).doc(currentUser.uid).update({
+          addresses: userAddresses,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        renderAddresses();
+        updateAllCounts();
+        showNotification('Address deleted successfully!');
+        
+      } catch (error) {
+        console.error('Error deleting address:', error);
+        showNotification('Error deleting address', 'error');
+      }
+    }
+
+    async function setDefaultAddress(addressId) {
+      try {
+        if (!currentUser) return;
+        
+        userAddresses = userAddresses.map(addr => ({
+          ...addr,
+          isDefault: addr.id === addressId
+        }));
+        
+        await db.collection(COLLECTIONS.USERS).doc(currentUser.uid).update({
+          addresses: userAddresses,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        renderAddresses();
+        showNotification('Default address updated successfully!');
+        
+      } catch (error) {
+        console.error('Error setting default address:', error);
+        showNotification('Error updating default address', 'error');
+      }
+    }
+
+    function renderAddresses() {
+      const container = document.getElementById('addresses-container');
+      
+      if (userAddresses.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>No addresses found</h3>
+            <p>Add your first address to get started with deliveries.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = '';
+      
+      userAddresses.forEach(address => {
+        const addressCard = document.createElement('div');
+        addressCard.className = `address-card ${address.isDefault ? 'default' : ''}`;
+        
+        addressCard.innerHTML = `
+          <div class="address-header">
+            <div class="address-name">${address.name}</div>
+            ${address.isDefault ? '<span class="default-badge">Default</span>' : ''}
+          </div>
+          <div class="address-details">
+            <p><strong>${address.name}</strong></p>
+            <p>${address.street}</p>
+            <p>${address.city}, ${address.state} - ${address.zipCode}</p>
+            <p>${address.country}</p>
+            <p>Phone: ${address.phone}</p>
+          </div>
+          <div class="address-actions">
+            <button class="btn" onclick="editAddress('${address.id}')">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            ${!address.isDefault ? `
+              <button class="btn" onclick="setDefaultAddress('${address.id}')" style="background-color: #2196f3;">
+                <i class="fas fa-star"></i> Set Default
+              </button>
+            ` : ''}
+            <button class="btn" onclick="confirmDeleteAddress('${address.id}')" style="background-color: #f44336;">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        `;
+        
+        container.appendChild(addressCard);
+      });
+    }
+
+    function editAddress(addressId) {
+      const address = userAddresses.find(addr => addr.id === addressId);
+      if (address) {
+        openAddressModal(address, true);
+      }
+    }
+
+    function confirmDeleteAddress(addressId) {
+      const address = userAddresses.find(addr => addr.id === addressId);
+      if (address && confirm(`Are you sure you want to delete "${address.name}" address?`)) {
+        deleteAddress(addressId);
+      }
+    }
+
+    // ==================== WISHLIST FUNCTIONS ====================
+
+    async function loadUserWishlist(userId) {
+      try {
+        const wishlistRef = db.collection(COLLECTIONS.WISHLIST).where('userId', '==', userId);
+        const snapshot = await wishlistRef.get();
+        
+        userWishlist = [];
+        snapshot.forEach(doc => {
+          userWishlist.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+        
+        return userWishlist;
+        
+      } catch (error) {
+        console.error('Error loading wishlist:', error);
+        return [];
+      }
+    }
+
+    async function addToWishlist(product) {
+      try {
+        if (!currentUser) {
+          showNotification('Please log in to add items to wishlist', 'error');
+          return;
+        }
+        
+        // Check if item already exists
+        const existingItem = userWishlist.find(item => item.productId === product.id);
+        if (existingItem) {
+          showNotification('Item already in wishlist');
+          return;
+        }
+        
+        const wishlistItem = {
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          userId: currentUser.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const docRef = await db.collection(COLLECTIONS.WISHLIST).add(wishlistItem);
+        
+        userWishlist.push({
+          id: docRef.id,
+          ...wishlistItem
+        });
+        
+        renderWishlist();
+        updateAllCounts();
+        showNotification('Added to wishlist!');
+        
+      } catch (error) {
+        console.error('Error adding to wishlist:', error);
+        showNotification('Error adding to wishlist', 'error');
+      }
+    }
+
+    async function removeFromWishlist(wishlistId) {
+      try {
+        await db.collection(COLLECTIONS.WISHLIST).doc(wishlistId).delete();
+        
+        userWishlist = userWishlist.filter(item => item.id !== wishlistId);
+        
+        renderWishlist();
+        updateAllCounts();
+        showNotification('Removed from wishlist');
+        
+      } catch (error) {
+        console.error('Error removing from wishlist:', error);
+        showNotification('Error removing from wishlist', 'error');
+      }
+    }
+
+    function renderWishlist() {
+      const container = document.getElementById('wishlist-container');
+      
+      if (userWishlist.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-heart"></i>
+            <h3>Your wishlist is empty</h3>
+            <p>Add items you love to keep track of them!</p>
+            <button class="btn" onclick="window.location.href='index.html'">Start Shopping</button>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = '';
+      
+      userWishlist.forEach(item => {
+        const wishlistItem = document.createElement('div');
+        wishlistItem.className = 'wishlist-item';
+        wishlistItem.innerHTML = `
+          <img src="${item.image}" alt="${item.name}">
+          <div class="wishlist-info">
+            <h4>${item.name}</h4>
+            <div class="wishlist-price">₹${item.price.toLocaleString('en-IN')}</div>
+            <div class="wishlist-actions">
+              <button class="btn" onclick="addToCartFromWishlist('${item.productId}', '${item.name}', ${item.price}, '${item.image}')">
+                Add to Cart
+              </button>
+              <button class="btn" onclick="removeFromWishlist('${item.id}')" style="background-color: #666;">
+                Remove
+              </button>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(wishlistItem);
+      });
+    }
+
+    function addToCartFromWishlist(productId, name, price, image) {
+      addToCart({
+        id: productId,
+        name: name,
+        price: price,
+        image: image
+      });
+    }
+
+    // ==================== PROFILE FUNCTIONS ====================
+
+    async function loadUserProfile(userId) {
+      try {
+        const userDoc = await db.collection(COLLECTIONS.USERS).doc(userId).get();
+        
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          
+          // Update profile display
+          document.getElementById('profile-name').textContent = 
+            `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 
+            currentUser.displayName || 'User';
+          
+          document.getElementById('profile-email').textContent = currentUser.email;
+          
+          // Generate avatar from initials
+          const avatar = document.getElementById('profile-avatar');
+          const names = userData.firstName && userData.lastName ?
+            `${userData.firstName[0]}${userData.lastName[0]}` :
+            currentUser.email ? currentUser.email[0].toUpperCase() : 'U';
+          avatar.textContent = names;
+          
+          // Populate profile form
+          document.getElementById('first-name').value = userData.firstName || '';
+          document.getElementById('last-name').value = userData.lastName || '';
+          document.getElementById('email').value = currentUser.email;
+          document.getElementById('phone').value = userData.phone || '';
+          
+        } else {
+          // Create initial user document
+          const initialData = {
+            firstName: '',
+            lastName: '',
+            email: currentUser.email,
+            phone: '',
+            addresses: [],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          
+          await db.collection(COLLECTIONS.USERS).doc(userId).set(initialData);
+        }
+        
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+        showNotification('Error loading profile data', 'error');
+      }
+    }
+
+    async function saveUserProfile(profileData) {
+      try {
+        if (!currentUser) return false;
+        
+        setLoadingState(saveBtn, true);
+        
+        await db.collection(COLLECTIONS.USERS).doc(currentUser.uid).set(profileData, { merge: true });
+        
+        // Update display
+        document.getElementById('profile-name').textContent = 
+          `${profileData.firstName} ${profileData.lastName}`;
+        
+        const avatar = document.getElementById('profile-avatar');
+        avatar.textContent = `${profileData.firstName[0]}${profileData.lastName[0]}`;
+        
+        showNotification('Profile updated successfully!');
+        return true;
+        
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        showNotification('Error saving profile', 'error');
+        return false;
+      } finally {
+        setLoadingState(saveBtn, false, 'Save Changes');
+      }
+    }
+
+    // ==================== ADDRESS MODAL FUNCTIONS ====================
+
+    function openAddressModal(addressData = null, isEditing = false) {
+      currentEditingAddressId = addressData?.id || null;
+      
+      if (isEditing && addressData) {
+        addressModalTitle.textContent = 'Edit Address';
+        saveAddressBtn.textContent = 'Update Address';
+        
+        // Populate form with existing data
+        document.getElementById('address-name').value = addressData.name || '';
+        document.getElementById('address-street').value = addressData.street || '';
+        document.getElementById('address-city').value = addressData.city || '';
+        document.getElementById('address-state').value = addressData.state || '';
+        document.getElementById('address-zip').value = addressData.zipCode || '';
+        document.getElementById('address-country').value = addressData.country || 'India';
+        document.getElementById('address-phone').value = addressData.phone || '';
+        document.getElementById('address-default').checked = addressData.isDefault || false;
+      } else {
+        addressModalTitle.textContent = 'Add New Address';
+        saveAddressBtn.textContent = 'Save Address';
+        addressForm.reset();
+        document.getElementById('address-country').value = 'India';
+        document.getElementById('address-state').value = 'Tamil Nadu';
+        document.getElementById('address-city').value = 'Salem';
+      }
+
+      addressModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAddressModal() {
+      addressModal.classList.remove('active');
+      document.body.style.overflow = '';
+      addressForm.reset();
+      currentEditingAddressId = null;
+      clearFormErrors();
+    }
+
+    function clearFormErrors() {
+      document.querySelectorAll('.error-message').forEach(el => {
+        el.style.display = 'none';
+      });
+    }
+
+    function validateAddressForm(formData) {
+      clearFormErrors();
+      let isValid = true;
+      
+      // Validate required fields
+      const requiredFields = [
+        { field: 'name', element: 'name-error', message: 'Address name is required' },
+        { field: 'street', element: 'street-error', message: 'Street address is required' },
+        { field: 'city', element: 'city-error', message: 'City is required' },
+        { field: 'state', element: 'state-error', message: 'State is required' },
+        { field: 'zipCode', element: 'zip-error', message: 'ZIP code is required' },
+        { field: 'country', element: 'country-error', message: 'Country is required' },
+        { field: 'phone', element: 'phone-error', message: 'Phone number is required' }
+      ];
+
+      requiredFields.forEach(({ field, element, message }) => {
+        if (!formData[field] || formData[field].trim() === '') {
+          document.getElementById(element).textContent = message;
+          document.getElementById(element).style.display = 'block';
+          isValid = false;
+        }
+      });
+
+      // Validate ZIP code format (basic validation for Indian postal codes)
+      if (formData.zipCode && !/^\d{6}$/.test(formData.zipCode.replace(/\s/g, ''))) {
+        document.getElementById('zip-error').textContent = 'Please enter a valid 6-digit ZIP code';
+        document.getElementById('zip-error').style.display = 'block';
+        isValid = false;
+      }
+
+      // Validate phone number format (basic validation)
+      if (formData.phone && !/^[\+\d\s\-\(\)]{10,15}$/.test(formData.phone)) {
+        document.getElementById('phone-error').textContent = 'Please enter a valid phone number';
+        document.getElementById('phone-error').style.display = 'block';
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+    // ==================== CHECKOUT FUNCTIONS ====================
+
+    async function processCheckout() {
+      try {
+        if (!currentUser) {
+          showNotification('Please log in to checkout', 'error');
+          window.location.href = 'index.html';
+          return;
+        }
+
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        if (cart.length === 0) {
+          showNotification('Your cart is empty', 'error');
+          return;
+        }
+
+        // Get default address
+        const defaultAddress = userAddresses.find(addr => addr.isDefault);
+        if (!defaultAddress) {
+          showNotification('Please add a delivery address', 'error');
+          // Switch to addresses tab
+          switchToTab('addresses');
+          return;
+        }
+
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        const orderData = {
+          items: cart,
+          total: total,
+          shippingAddress: defaultAddress,
+          paymentMethod: 'COD', // Cash on Delivery
+          orderNumber: generateOrderNumber()
+        };
+
+        setLoadingState(checkoutBtn, true, 'Processing Order...');
+
+        await createOrder(orderData);
+
+        cartSidebar.classList.remove('active');
+        showNotification('Order placed successfully!');
+
+        // Switch to orders tab to show the new order
+        switchToTab('orders');
+
+      } catch (error) {
+        console.error('Error processing checkout:', error);
+        showNotification('Error processing order. Please try again.', 'error');
+      } finally {
+        setLoadingState(checkoutBtn, false, 'Proceed to Checkout');
+      }
+    }
+
+    function generateOrderNumber() {
+      return 'ORD' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 3).toUpperCase();
+    }
+
+    function switchToTab(tabName) {
+      // Remove active class from all tabs
+      document.querySelectorAll('.profile-nav a').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+
+      // Add active class to target tab
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+    }
+
+    // ==================== UPDATE COUNTS FUNCTION ====================
+
+    function updateAllCounts() {
+      // Update cart count
+      updateCartCount();
+      
+      // Update stats in profile header
+      document.getElementById('orders-count').textContent = userOrders.length;
+      document.getElementById('wishlist-count').textContent = userWishlist.length;
+      document.getElementById('addresses-count').textContent = userAddresses.length;
+    }
+
+    // ==================== EVENT LISTENERS ====================
+
+    // Cart event listeners
+    cartLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      cartSidebar.classList.add('active');
+    });
+
+    closeCartBtn.addEventListener('click', () => {
+      cartSidebar.classList.remove('active');
+    });
+
+    // Close cart when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!cartSidebar.contains(e.target) && e.target !== cartLink && !cartLink.contains(e.target)) {
+        cartSidebar.classList.remove('active');
+      }
+    });
+
+    // Checkout button
+    checkoutBtn.addEventListener('click', processCheckout);
+
+    // Address modal event listeners
+    addAddressBtn.addEventListener('click', () => {
+      openAddressModal();
+    });
+
+    closeModalBtn.addEventListener('click', closeAddressModal);
+
+    // Close modal when clicking outside
+    addressModal.addEventListener('click', (e) => {
+      if (e.target === addressModal) {
+        closeAddressModal();
+      }
+    });
+
+    // Address form submission
+    addressForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = {
+        name: document.getElementById('address-name').value.trim(),
+        street: document.getElementById('address-street').value.trim(),
+        city: document.getElementById('address-city').value.trim(),
+        state: document.getElementById('address-state').value,
+        zipCode: document.getElementById('address-zip').value.trim(),
+        country: document.getElementById('address-country').value,
+        phone: document.getElementById('address-phone').value.trim(),
+        isDefault: document.getElementById('address-default').checked
+      };
+
+      if (!validateAddressForm(formData)) {
+        return;
+      }
+
+      try {
+        setLoadingState(saveAddressBtn, true, currentEditingAddressId ? 'Update Address' : 'Save Address');
+
+        await saveAddressToFirebase(formData);
+        
+        renderAddresses();
+        updateAllCounts();
+        closeAddressModal();
+        
+        showNotification(
+          currentEditingAddressId ? 'Address updated successfully!' : 'Address saved successfully!'
+        );
+      } catch (error) {
+        console.error('Error saving address:', error);
+        document.getElementById('form-error').textContent = 'Error saving address. Please try again.';
+        document.getElementById('form-error').style.display = 'block';
+      } finally {
+        setLoadingState(saveAddressBtn, false, currentEditingAddressId ? 'Update Address' : 'Save Address');
+      }
+    });
+
+    // Profile form submission
+    profileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const profileData = {
+        firstName: document.getElementById('first-name').value,
+        lastName: document.getElementById('last-name').value,
+        phone: document.getElementById('phone').value,
+        email: currentUser.email,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      await saveUserProfile(profileData);
+    });
+
+    // Tab switching functionality
+    document.querySelectorAll('.profile-nav a').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        if (tab.id === 'sidebar-logout') {
+          auth.signOut().then(() => {
+            localStorage.removeItem('cart'); // Clear cart on logout
+            window.location.href = 'index.html';
+          });
+          return;
+        }
+
+        const tabName = tab.getAttribute('data-tab');
+        if (tabName) {
+          switchToTab(tabName);
+        }
+      });
+    });
+
+    // Handle escape key to close modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (addressModal.classList.contains('active')) {
+          closeAddressModal();
+        } else if (cartSidebar.classList.contains('active')) {
+          cartSidebar.classList.remove('active');
+        }
+      }
+    });
+
+    // ==================== SAMPLE DATA FUNCTIONS ====================
+
+    // Function to populate sample wishlist data
+    async function populateSampleWishlist() {
+      if (userWishlist.length > 0) return; // Don't populate if user already has wishlist items
+
+      const sampleProducts = [
+        {
+          id: 'sample1',
+          name: "Wireless Bluetooth Headphones",
+          price: 2499,
+          image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+        },
+        {
+          id: 'sample2',
+          name: "Smart Fitness Watch",
+          price: 5999,
+          image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+        },
+        {
+          id: 'sample3',
+          name: "Premium Laptop Bag",
+          price: 1299,
+          image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+        }
+      ];
+
+      try {
+        for (const product of sampleProducts) {
+          const wishlistItem = {
+            productId: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            userId: currentUser.uid,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          
+          const docRef = await db.collection(COLLECTIONS.WISHLIST).add(wishlistItem);
+          
+          userWishlist.push({
+            id: docRef.id,
+            ...wishlistItem
+          });
+        }
+        
+        renderWishlist();
+        updateAllCounts();
+      } catch (error) {
+        console.error('Error populating sample wishlist:', error);
+      }
+    }
+
+    // ==================== INITIALIZATION ====================
+
+    // Initialize page
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
+        
+        try {
+          // Show loading states
+          document.getElementById('orders-container').innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-spinner fa-spin"></i>
+              <h3>Loading...</h3>
+              <p>Please wait while we load your data.</p>
+            </div>
+          `;
+          
+          // Sync all data with Firebase
+          await syncDataWithFirebase(user.uid);
+          
+          // Populate sample wishlist if empty (for demo purposes)
+          await populateSampleWishlist();
+          
+        } catch (error) {
+          console.error('Error initializing user data:', error);
+          showNotification('Error loading user data', 'error');
+        }
+      } else {
+        // User is not logged in, redirect to login
+        window.location.href = 'index.html';
+      }
+    });
+
+    // Make functions globally available for onclick handlers
+    window.addToCart = addToCart;
+    window.addToCartFromWishlist = addToCartFromWishlist;
+    window.updateCartItemQuantity = updateCartItemQuantity;
+    window.removeFromCart = removeFromCart;
+    window.removeFromWishlist = removeFromWishlist;
+    window.addToWishlist = addToWishlist;
+    window.editAddress = editAddress;
+    window.confirmDeleteAddress = confirmDeleteAddress;
+    window.setDefaultAddress = setDefaultAddress;
+    window.viewOrderDetails = viewOrderDetails;
+
+    // Initialize cart count on page load
+    updateCartCount();
+
+  </script>
+</body>
+
+</html>

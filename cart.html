@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - JARVIS</title>
+    <link rel="icon" type="image/png" href="top.jpg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #333;
+            --light-color: #f5f5f5;
+            --dark-color: #222;
+            --text-color: #333;
+            --text-light: #666;
+            --white: #fff;
+            --border-color: #eee;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-bar {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo h1 {
+            color: var(--primary-color);
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-actions a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .user-actions a:hover {
+            color: var(--primary-color);
+        }
+
+        .user-actions .cart {
+            position: relative;
+        }
+
+        .user-actions .cart #cart-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* Navigation */
+        nav {
+            padding: 15px 0;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        nav ul li {
+            margin-right: 30px;
+            white-space: nowrap;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--secondary-color);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            padding: 20px 0;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .breadcrumb a {
+            color: var(--text-light);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Page Title */
+        .page-title {
+            text-align: center;
+            margin: 20px 0 30px;
+            position: relative;
+        }
+
+        .page-title h2 {
+            font-size: 32px;
+            color: var(--secondary-color);
+            display: inline-block;
+        }
+
+        .page-title h2::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background-color: var(--primary-color);
+            margin: 10px auto 0;
+        }
+
+        /* Cart Content */
+        .cart-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .cart-items {
+            flex: 1;
+            min-width: 300px;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .cart-summary {
+            width: 300px;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            position: sticky;
+            top: 100px;
+        }
+
+        /* Cart Item */
+        .cart-item {
+            display: flex;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .cart-item-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-btn {
+            background-color: #f5f5f5;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .quantity-btn:hover {
+            background-color: #e5e5e5;
+        }
+
+        .quantity-display {
+            margin: 0 10px;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .remove-btn {
+            color: #ff4757;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 14px;
+        }
+
+        .remove-btn:hover {
+            color: #ff2e43;
+        }
+
+        /* Cart Summary */
+        .summary-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .checkout-btn:hover {
+            background-color: #ff5252;
+        }
+
+        .continue-shopping {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .continue-shopping:hover {
+            text-decoration: underline;
+        }
+
+        /* Empty Cart */
+        .empty-cart {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .empty-cart i {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-cart h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+
+        .empty-cart p {
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: var(--dark-color);
+            color: var(--white);
+            padding: 50px 0 0;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-col h3 {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .footer-col p,
+        .footer-col ul {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-col p i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            color: var(--white);
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: var(--primary-color);
+        }
+
+        .copyright {
+            border-top: 1px solid #444;
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .payment-methods i {
+            font-size: 24px;
+            margin-left: 15px;
+            color: #ddd;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .cart-content {
+                flex-direction: column;
+            }
+
+            .cart-summary {
+                width: 100%;
+                position: static;
+            }
+
+            .cart-item {
+                flex-direction: column;
+            }
+
+            .cart-item-image {
+                width: 100%;
+                height: auto;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+
+            nav ul li {
+                margin-right: 15px;
+            }
+
+            .copyright {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+        }
+
+        .logo h1 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+
+        /* Mobile User Actions */
+        .user-actions .desktop-text {
+            display: inline;
+        }
+
+        .user-actions .mobile-icon {
+            display: none;
+            font-size: 20px;
+        }
+
+        /* Mobile Menu Styles */
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--secondary-color);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            width: 200px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-menu a:hover {
+            background-color: #f5f5f5;
+            color: var(--primary-color);
+        }
+
+        /* Active nav state */
+        nav ul li.active a {
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        nav ul li.active a:after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        /* Loading and error states */
+        .loading,
+        .no-products,
+        .error,
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+            grid-column: 1 / -1;
+        }
+
+        /* Responsive User Actions */
+        @media (max-width: 768px) {
+            .user-actions .desktop-text {
+                display: none;
+            }
+
+            .user-actions .mobile-icon {
+                display: inline-block;
+            }
+
+            .user-actions a {
+                padding: 8px;
+                font-size: 18px;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            nav ul {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav .container {
+                display: block !important;
+                overflow-x: auto !important;
+                white-space: nowrap !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+
+            nav ul {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                padding-bottom: 10px !important;
+            }
+
+            nav ul li {
+                margin-right: 30px !important;
+                flex-shrink: 0 !important;
+            }
+
+            /* Hide mobile menu elements since we don't need them */
+            .menu-toggle,
+            .mobile-menu {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="top-bar">
+            <div class="container">
+                <div class="logo">
+                    <h1><img src="logo.jpg" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"
+                            alt="Jarvis Logo"> Jarvis</h1>
+                </div>
+                <div class="user-actions">
+                    <a href="profile.html">
+                        <i class="fas fa-user mobile-icon"></i>
+                        <span class="desktop-text">My Account</span>
+                    </a>
+                    <a href="Customer.html">
+                        <i class="fas fa-headset mobile-icon"></i>
+                        <span class="desktop-text">Customer Service</span>
+                    </a>
+
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- <nav>
+            <div class="container">
+                <ul>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="electronics.html">Electronics</a></li>
+                    <li><a href="fashion.html">Fashion</a></li>
+                    <li><a href="home-kitchen.html">Home & Kitchen</a></li>
+                    <li><a href="groceries.html">Groceries</a></li>
+                    <li><a href="beauty.html">Beauty</a></li>
+                    <li><a href="offers.html">Offers</a></li>
+                </ul>
+            </div>
+        </nav> -->
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="home.html">Home</a> > <span>Your Cart</span>
+        </div>
+
+        <div class="page-title">
+            <h2>Your Shopping Cart</h2>
+        </div>
+
+        <div class="cart-content">
+            <div class="cart-items" id="cart-items-container">
+                <!-- Cart items will be loaded here -->
+                <div class="empty-cart" id="empty-cart-message">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Your cart is empty</h3>
+                    <p>Looks like you haven't added any items to your cart yet.</p>
+                    <a href="home.html" class="btn">Continue Shopping</a>
+                </div>
+            </div>
+
+            <div class="cart-summary">
+                <h3 class="summary-title">Order Summary</h3>
+                <div class="summary-item">
+                    <span>Subtotal (<span id="item-count">0</span> items)</span>
+                    <span>₹<span id="subtotal">0</span></span>
+                </div>
+                <div class="summary-item">
+                    <span>Shipping</span>
+                    <span id="shipping">Free</span>
+                </div>
+                <div class="summary-item">
+                    <span>Tax</span>
+                    <span>₹<span id="tax">0</span></span>
+                </div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span>₹<span id="total">0</span></span>
+                </div>
+                <button class="checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+                <a href="home.html" class="continue-shopping">Continue Shopping</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>JARVIS</h3>
+                    <p>Your one-stop destination for all your shopping needs. We offer a wide range of products at
+                        competitive prices.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="home.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="Customer.html">Contact Us</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Customer Service</h3>
+                    <ul>
+                        <li><a href="terms.html">FAQ</a></li>
+                        <li><a href="Customer.html">Returns & Refunds</a></li>
+                        <li><a href="privacy.html">Shipping Policy</a></li>
+                        <li><a href="Tracking.html">Track Your Order</a></li>
+                        <li><a href="Customer.html">Help Center</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 TPT, Tamilnadu, India</p>
+                    <p><i class="fas fa-phone"></i> +91 6383221055</p>
+                    <p><i class="fas fa-envelope"></i> spprtjarvis@gmail.com</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 JARVIS. All Rights Reserved.</p>
+                <div class="payment-methods">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-paypal"></i>
+                    <i class="fab fa-cc-apple-pay"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqXN_NjP3OUGhd-ah-hWTO66REtlMqwAk",
+            authDomain: "jarvis-e-commerce-a6563.firebaseapp.com",
+            projectId: "jarvis-e-commerce-a6563",
+            storageBucket: "jarvis-e-commerce-a6563.firebasestorage.app",
+            messagingSenderId: "998302088355",
+            appId: "1:998302088355:web:36279bf2694647baf05316",
+            measurementId: "G-Q9E7Z27L6K"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // DOM Elements
+        const cartItemsContainer = document.getElementById('cart-items-container');
+        const emptyCartMessage = document.getElementById('empty-cart-message');
+        const cartCount = document.getElementById('cart-count');
+        const itemCount = document.getElementById('item-count');
+        const subtotal = document.getElementById('subtotal');
+        const tax = document.getElementById('tax');
+        const total = document.getElementById('total');
+        const checkoutBtn = document.getElementById('checkout-btn');
+
+        // Cart array
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Initialize the page
+        function init() {
+            // Check if user is logged in and load appropriate cart
+            const user = firebase.auth().currentUser;
+            if (user) {
+                loadCartFromFirebase();
+            } else {
+                // Load from localStorage for guest users
+                updateCartUI();
+            }
+        }
+
+        // Load cart from Firebase
+        async function loadCartFromFirebase() {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    console.log("User not logged in, loading from localStorage");
+                    cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    updateCartUI();
+                    return;
+                }
+
+                // Get user's cart from Firestore
+                const q = query(collection(db, "cart"), where("userId", "==", user.uid));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    cart = [];
+                    querySnapshot.forEach((doc) => {
+                        const item = doc.data();
+                        cart.push({
+                            id: item.productId,
+                            name: item.name,
+                            price: item.price,
+                            image: item.image,
+                            quantity: item.quantity
+                        });
+                    });
+                    console.log("Cart loaded from Firebase");
+                } else {
+                    // If no cart in Firebase, try loading from localStorage
+                    cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    // Save localStorage cart to Firebase
+                    await saveCartToFirebase();
+                }
+
+                updateCartUI();
+            } catch (error) {
+                console.error("Error loading cart from Firebase:", error);
+                // Fallback to localStorage
+                cart = JSON.parse(localStorage.getItem('cart')) || [];
+                updateCartUI();
+            }
+        }
+
+        // Save cart to Firebase
+        async function saveCartToFirebase() {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    console.log("User not logged in, cart saved to localStorage only");
+                    return false;
+                }
+
+                // Clear existing cart in Firebase
+                const q = query(collection(db, "cart"), where("userId", "==", user.uid));
+                const querySnapshot = await getDocs(q);
+
+                const deletePromises = [];
+                querySnapshot.forEach((doc) => {
+                    deletePromises.push(deleteDoc(doc.ref));
+                });
+
+                await Promise.all(deletePromises);
+
+                // Add all items from cart to Firebase
+                for (const item of cart) {
+                    await addDoc(collection(db, "cart"), {
+                        productId: item.id,
+                        name: item.name,
+                        price: item.price,
+                        image: item.image,
+                        quantity: item.quantity,
+                        userId: user.uid,
+                        addedAt: new Date()
+                    });
+                }
+
+                console.log("Cart saved to Firebase");
+                return true;
+            } catch (error) {
+                console.error("Error saving cart to Firebase:", error);
+                return false;
+            }
+        }
+
+        // Update cart UI
+        function updateCartUI() {
+            // Update cart count
+            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCount.textContent = totalItems;
+
+            // Clear cart items container
+            cartItemsContainer.innerHTML = '';
+
+            if (cart.length === 0) {
+                // Show empty cart message
+                emptyCartMessage.style.display = 'block';
+                updateCartSummary(0, 0, 0);
+                return;
+            }
+
+            // Hide empty cart message
+            emptyCartMessage.style.display = 'none';
+
+            // Add cart items
+            let calculatedSubtotal = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                calculatedSubtotal += itemTotal;
+
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('cart-item');
+                cartItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="cart-item-image" onerror="this.src='https://via.placeholder.com/100x100?text=Product'">
+                    <div class="cart-item-details">
+                        <h3 class="cart-item-name">${item.name}</h3>
+                        <div class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</div>
+                        <div class="cart-item-actions">
+                            <button class="quantity-btn decrease" data-id="${item.id}">-</button>
+                            <span class="quantity-display">${item.quantity}</span>
+                            <button class="quantity-btn increase" data-id="${item.id}">+</button>
+                            <button class="remove-btn" data-id="${item.id}">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                cartItemsContainer.appendChild(cartItem);
+
+                // Add event listeners for quantity buttons
+                cartItem.querySelector('.increase').addEventListener('click', () => {
+                    updateItemQuantity(item.id, item.quantity + 1);
+                });
+
+                cartItem.querySelector('.decrease').addEventListener('click', () => {
+                    if (item.quantity > 1) {
+                        updateItemQuantity(item.id, item.quantity - 1);
+                    } else {
+                        removeFromCart(item.id);
+                    }
+                });
+
+                cartItem.querySelector('.remove-btn').addEventListener('click', () => {
+                    removeFromCart(item.id);
+                });
+            });
+
+            // Update cart summary
+            updateCartSummary(calculatedSubtotal);
+        }
+
+        // Update item quantity
+        async function updateItemQuantity(productId, newQuantity) {
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity = newQuantity;
+                localStorage.setItem('cart', JSON.stringify(cart));
+
+                // Save to Firebase if user is logged in
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    await saveCartToFirebase();
+                }
+
+                updateCartUI();
+            }
+        }
+
+        // Remove item from cart
+        async function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Save to Firebase if user is logged in
+            const user = firebase.auth().currentUser;
+            if (user) {
+                await saveCartToFirebase();
+            }
+
+            updateCartUI();
+        }
+
+        // Update cart summary
+        function updateCartSummary(subtotalValue) {
+            const itemCountValue = cart.reduce((total, item) => total + item.quantity, 0);
+            const taxValue = subtotalValue * 0.18; // 18% tax
+            const totalValue = subtotalValue + taxValue;
+
+            itemCount.textContent = itemCountValue;
+            subtotal.textContent = subtotalValue.toLocaleString('en-IN');
+            tax.textContent = taxValue.toLocaleString('en-IN');
+            total.textContent = totalValue.toLocaleString('en-IN');
+        }
+
+        // Checkout button
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert('Your cart is empty. Add some items before checkout.');
+                return;
+            }
+
+            window.location.href = 'checkout.html';
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', init);
+
+
+        // Cart sync is now only triggered by the "Sync Cart Across Devices" button.
+    </script>
+</body>
+
+</html>

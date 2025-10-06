@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Tracking - Jarvis</title>
+  <link rel="icon" type="image/png" href="top.jpg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Add Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    /* All previous CSS remains the same */
+    :root {
+      --primary-color: #ff6b6b;
+      --secondary-color: #333;
+      --light-color: #f5f5f5;
+      --dark-color: #222;
+      --text-color: #333;
+      --text-light: #666;
+      --white: #fff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--light-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #ff5252;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Header Styles */
+    header {
+      background-color: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .top-bar {
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo h1 {
+      color: var(--primary-color);
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .search-bar {
+      display: flex;
+      margin: 0 20px;
+      flex-grow: 0.5;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px 0 0 4px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--primary-color);
+    }
+
+    .search-bar button {
+      padding: 10px 15px;
+      background-color: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-actions a {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .user-actions a:hover {
+      color: var(--primary-color);
+    }
+
+    .user-actions .cart {
+      position: relative;
+    }
+
+    .user-actions .cart #cart-count {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background-color: var(--primary-color);
+      color: var(--white);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      padding: 15px 0;
+    }
+
+    nav ul li {
+      margin-right: 100px;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: var(--secondary-color);
+      font-weight: 500;
+    }
+
+    nav ul li a:hover {
+      color: var(--primary-color);
+    }
+
+    /* Order Tracking Specific Styles */
+    .order-tracking {
+      padding: 50px 0;
+      min-height: 60vh;
+    }
+
+    .order-tracking h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: var(--secondary-color);
+      font-size: 2.5rem;
+    }
+
+    .track-order-form {
+      max-width: 600px;
+      margin: 0 auto 40px;
+      background: var(--white);
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--secondary-color);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    /* Add this to your CSS */
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .form-actions .btn {
+      flex: 1;
+      text-align: center;
+      background-color: #f0f0f0;
+      color: #333;
+    }
+
+    .form-actions .btn:hover {
+      background-color: #e0e0e0;
+    }
+
+    .form-actions .track-btn {
+      flex: 1;
+    }
+
+    .track-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .track-btn:hover {
+      background-color: #ff5252;
+    }
+
+    .order-status {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--white);
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+
+    .order-header h2 {
+      color: var(--secondary-color);
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    .order-meta {
+      text-align: right;
+    }
+
+    .order-date,
+    .order-amount {
+      display: block;
+      color: var(--text-light);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .status-badge.processing {
+      background-color: #fff3e0;
+      color: #e65100;
+    }
+
+    .status-badge.shipped {
+      background-color: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .status-badge.delivered {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-badge.cancelled {
+      background-color: #ffebee;
+      color: #c62828;
+    }
+
+    /* Timeline Styles */
+    .timeline {
+      position: relative;
+      padding-left: 50px;
+      margin: 30px 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #e0e0e0;
+    }
+
+    .timeline-step {
+      position: relative;
+      margin-bottom: 30px;
+      padding: 15px;
+      background: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .timeline-step::before {
+      content: '';
+      position: absolute;
+      left: -43px;
+      top: 20px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #bdbdbd;
+      border: 4px solid var(--white);
+      z-index: 2;
+    }
+
+    .timeline-step.active::before {
+      background: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+    }
+
+    .timeline-step.completed::before {
+      background: #4caf50;
+      box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.2);
+    }
+
+    .timeline-step.cancelled::before {
+      background: #f44336;
+    }
+
+    .timeline-step h4 {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      color: var(--secondary-color);
+    }
+
+    .timeline-step .status-icon {
+      margin-right: 10px;
+      font-size: 1.2em;
+    }
+
+    .timeline-step .status-details {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .timeline-step .status-message {
+      color: var(--text-light);
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+
+    .timeline-step .status-time {
+      color: var(--text-light);
+      font-size: 0.9em;
+    }
+
+    /* Delivery Map Styles */
+    .delivery-map {
+      height: 250px;
+      margin: 20px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #eee;
+    }
+
+    /* Additional Info Sections */
+    .additional-info {
+      background: var(--white);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .additional-info h3 {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      color: var(--secondary-color);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .info-item {
+      margin-bottom: 10px;
+    }
+
+    .info-item strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--secondary-color);
+    }
+
+    /* Order Items */
+    .order-items {
+      margin-top: 30px;
+    }
+
+    .order-item {
+      display: flex;
+      padding: 15px;
+      background: var(--white);
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s;
+      flex-wrap: wrap;
+    }
+
+    .order-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      margin-right: 20px;
+      border-radius: 4px;
+    }
+
+    .order-item-info {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .order-item-info h4 {
+      margin-bottom: 5px;
+      color: var(--secondary-color);
+    }
+
+    .order-item-actions {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .return-eligible {
+      color: #4caf50;
+      font-size: 0.9em;
+    }
+
+    /* Order Summary */
+    .order-summary {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .order-summary h3 {
+      margin-bottom: 15px;
+      color: var(--secondary-color);
+    }
+
+    .order-summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .order-total {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+    }
+
+    /* Action Buttons */
+    .order-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 10px 15px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .primary-action {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .secondary-action {
+      background-color: #f0f0f0;
+      color: var(--text-color);
+    }
+
+    .danger-action {
+      background-color: #ffebee;
+      color: #f44336;
+    }
+
+    /* Loading State */
+    .loading-state {
+      display: none;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Help Section */
+    .help-section {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .help-section a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* Footer Styles */
+    footer {
+      background-color: var(--dark-color);
+      color: var(--white);
+      padding: 50px 0 0;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .footer-col h3 {
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .footer-col p,
+    .footer-col ul {
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 10px;
+    }
+
+    .footer-col ul li a {
+      color: #ddd;
+      text-decoration: none;
+    }
+
+    .footer-col ul li a:hover {
+      color: var(--primary-color);
+    }
+
+    .footer-col p i {
+      margin-right: 10px;
+      color: var(--primary-color);
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .social-icons a {
+      color: var(--white);
+      font-size: 20px;
+      transition: color 0.3s;
+    }
+
+    .social-icons a:hover {
+      color: var(--primary-color);
+    }
+
+    .copyright {
+      border-top: 1px solid #444;
+      padding: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .payment-methods i {
+      font-size: 24px;
+      margin-left: 15px;
+      color: #ddd;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+      nav ul li {
+        margin-right: 50px;
+      }
+
+      .order-header {
+        flex-direction: column;
+      }
+
+      .order-meta {
+        text-align: left;
+        margin-top: 10px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .order-item {
+        flex-direction: column;
+      }
+
+      .order-item img {
+        margin-right: 0;
+        margin-bottom: 15px;
+      }
+
+      .order-item-actions {
+        flex-direction: row;
+        margin-top: 15px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .order-actions {
+        flex-direction: column;
+      }
+
+      .action-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* Add this new style for empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      background: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 30px;
+    }
+
+    .empty-state i {
+      font-size: 50px;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+      color: var(--secondary-color);
+      margin-bottom: 15px;
+    }
+
+    .empty-state p {
+      color: var(--text-light);
+      margin-bottom: 20px;
+    }
+
+    .logo h1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+
+    /* Mobile User Actions */
+    .user-actions .desktop-text {
+      display: inline;
+    }
+
+    .user-actions .mobile-icon {
+      display: none;
+      font-size: 20px;
+    }
+
+    /* Mobile Menu Styles */
+    .menu-toggle {
+      display: none;
+      cursor: pointer;
+      padding: 10px;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background-color: var(--secondary-color);
+      margin: 5px 0;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      width: 200px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .mobile-menu.active {
+      display: block;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 20px;
+      color: var(--secondary-color);
+      text-decoration: none;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-menu a:hover {
+      background-color: #f5f5f5;
+      color: var(--primary-color);
+    }
+
+    /* Active nav state */
+    nav ul li.active a {
+      color: var(--primary-color);
+      position: relative;
+    }
+
+    nav ul li.active a:after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary-color);
+    }
+
+    /* Loading and error states */
+    .loading,
+    .no-products,
+    .error,
+    .empty-cart {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 18px;
+      grid-column: 1 / -1;
+    }
+
+    /* Responsive User Actions */
+    @media (max-width: 768px) {
+      .user-actions .desktop-text {
+        display: none;
+      }
+
+      .user-actions .mobile-icon {
+        display: inline-block;
+      }
+
+      .user-actions a {
+        padding: 8px;
+        font-size: 18px;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      nav ul {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav .container {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      nav ul {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        padding-bottom: 10px !important;
+      }
+
+      nav ul li {
+        margin-right: 30px !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Hide mobile menu elements since we don't need them */
+      .menu-toggle,
+      .mobile-menu {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header remains the same as previous examples -->
+  <header>
+    <div class="top-bar">
+      <div class="container">
+        <div class="logo">
+          <h1><img src="logo.jpg" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"
+              alt="Jarvis Logo"> Jarvis</h1>
+        </div>
+        <div class="search-bar">
+          <input type="text" placeholder="Search for products...">
+          <button><i class="fas fa-search"></i></button>
+        </div>
+        <div class="user-actions">
+          <a href="profile.html">
+            <i class="fas fa-user mobile-icon"></i>
+            <span class="desktop-text">My Account</span>
+          </a>
+          <a href="Customer.html">
+            <i class="fas fa-headset mobile-icon"></i>
+            <span class="desktop-text">Customer Service</span>
+          </a>
+          <a href="#" class="cart">
+            <i class="fas fa-shopping-cart mobile-icon"></i>
+            <span class="desktop-text">Cart</span>
+            <span id="cart-count">0</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <nav>
+      <div class="container">
+        <ul>
+          <li><a href="home.html">Home</a></li>
+          <li><a href="electronics.html">Electronics</a></li>
+          <li><a href="fashion.html">Fashion</a></li>
+          <li><a href="home-kitchen.html">Home & Kitchen</a></li>
+          <li><a href="groceries.html">Groceries</a></li>
+          <li><a href="beauty.html">Beauty</a></li>
+          <li><a href="offers.html">Offers</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main class="order-tracking">
+    <div class="container">
+      <h1>Track Your Order</h1>
+
+      <!-- In the track-order-form div, modify the button section to include both buttons in a flex container -->
+      <div class="track-order-form">
+        <div class="form-group">
+          <label for="order-id">Order ID</label>
+          <input type="text" id="order-id" placeholder="Enter your order ID" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address or Phone Number</label>
+          <input type="text" id="email" placeholder="Enter email or phone used for this order" required>
+        </div>
+        <div class="form-actions" style="display: flex; gap: 10px;">
+          <button class="track-btn" id="track-btn" style="flex: 1;">
+            <span id="btn-text">Track Order</span>
+            <span id="btn-spinner" class="loading-spinner" style="display: none;"></span>
+          </button>
+          <a href="thankyou.html" class="btn"
+            style="flex: 1; text-align: center; background-color: #f0f0f0; color: #333;">Continue Shopping</a>
+        </div>
+      </div>
+
+      <div class="loading-state" id="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Fetching your order details...</p>
+      </div>
+
+      <div class="empty-state" id="empty-state">
+        <i class="fas fa-box-open"></i>
+        <h3>No Order Found</h3>
+        <p>Enter your order details to track your recent purchase</p>
+        <a href="thankyou.html" class="btn">Continue Shopping</a>
+      </div>
+
+      <div class="order-status" id="order-status">
+        <!-- Order details will be populated by JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer remains the same as previous examples -->
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h3>About Jarvis</h3>
+          <p>Jarvis is India's fastest growing e-commerce platform, offering best prices and fastest delivery across the
+            country.</p>
+        </div>
+        <div class="footer-col">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="Customer.html">Contact</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms & Conditions</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Customer Service</h3>
+          <ul>
+            <li><a href="profile.html">My Account</a></li>
+            <li><a href="Tracking.html">Order Tracking</a></li>
+            <li><a href="profile.html">Wishlist</a></li>
+            <li><a href="Customer.html">Customer Service</a></li>
+            <li><a href="Tracking.html">Returns/Exchange</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Contact Us</h3>
+          <p><i class="fas fa-map-marker-alt"></i> 123 TPT, Tamilnadu, India</p>
+          <p><i class="fas fa-phone"></i> +91 6383221055</p>
+          <p><i class="fas fa-envelope"></i> spprtjarvis@gmail.com</p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="copyright">
+        <p>&copy; 2025 Jarvis E-commerce. All Rights Reserved.</p>
+        <div class="payment-methods">
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-cc-paypal"></i>
+          <i class="fab fa-cc-amazon-pay"></i>
+          <i class="fas fa-rupee-sign"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Firebase configuration - Replace with your actual Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqXN_NjP3OUGhd-ah-hWTO66REtlMqwAk",
+      authDomain: "jarvis-e-commerce-a6563.firebaseapp.com",
+      projectId: "jarvis-e-commerce-a6563",
+      storageBucket: "jarvis-e-commerce-a6563.firebasestorage.app",
+      messagingSenderId: "998302088355",
+      appId: "1:998302088355:web:36279bf2694647baf05316",
+      measurementId: "G-Q9E7Z27L6K"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initialize cart count
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      document.getElementById('cart-count').textContent = cart.reduce((total, item) => total + item.quantity, 0);
+
+      // Hide empty state initially if there's a recent order
+      const emptyState = document.getElementById('empty-state');
+      const orderStatus = document.getElementById('order-status');
+
+      // Check for recent order in localStorage (for backward compatibility)
+      const recentOrder = JSON.parse(localStorage.getItem('recentOrder'));
+
+      if (recentOrder) {
+        emptyState.style.display = 'none';
+        displayOrderDetails(recentOrder);
+        orderStatus.style.display = 'block';
+
+        // Pre-fill the form with recent order details
+        document.getElementById('order-id').value = recentOrder.id;
+        document.getElementById('email').value = recentOrder.customer.email || '';
+      } else {
+        emptyState.style.display = 'block';
+        orderStatus.style.display = 'none';
+      }
+
+      // Track order button functionality
+      const trackBtn = document.getElementById('track-btn');
+      const loadingState = document.getElementById('loading-state');
+
+      trackBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const orderId = document.getElementById('order-id').value.trim();
+        const emailOrPhone = document.getElementById('email').value.trim();
+
+        if (!orderId || !emailOrPhone) {
+          alert('Please enter both Order ID and Email/Phone');
+          return;
+        }
+
+        // Show loading state
+        document.getElementById('btn-text').style.display = 'none';
+        document.getElementById('btn-spinner').style.display = 'inline-block';
+        loadingState.style.display = 'block';
+        orderStatus.style.display = 'none';
+        emptyState.style.display = 'none';
+
+        // Fetch order from Firebase
+        fetchOrderFromFirebase(orderId, emailOrPhone);
+      });
+
+      // Fetch order details from Firebase
+      async function fetchOrderFromFirebase(orderId, emailOrPhone) {
+        try {
+          // Query Firestore for the order - matching your data structure
+          const ordersRef = db.collection('orders');
+          const querySnapshot = await ordersRef
+            .where('id', '==', orderId)
+            .where('customer.email', '==', emailOrPhone)
+            .get();
+
+          // Hide loading state
+          document.getElementById('btn-text').style.display = 'inline';
+          document.getElementById('btn-spinner').style.display = 'none';
+          loadingState.style.display = 'none';
+
+          if (!querySnapshot.empty) {
+            // Order found
+            const orderDoc = querySnapshot.docs[0];
+            const orderData = orderDoc.data();
+
+            // Store in localStorage for quick access
+            localStorage.setItem('recentOrder', JSON.stringify(orderData));
+
+            displayOrderDetails(orderData);
+            orderStatus.style.display = 'block';
+            emptyState.style.display = 'none';
+          } else {
+            // No order found, check with phone number
+            const phoneQuerySnapshot = await ordersRef
+              .where('id', '==', orderId)
+              .where('customer.phone', '==', emailOrPhone)
+              .get();
+
+            if (!phoneQuerySnapshot.empty) {
+              // Order found with phone number
+              const orderDoc = phoneQuerySnapshot.docs[0];
+              const orderData = orderDoc.data();
+
+              // Store in localStorage for quick access
+              localStorage.setItem('recentOrder', JSON.stringify(orderData));
+
+              displayOrderDetails(orderData);
+              orderStatus.style.display = 'block';
+              emptyState.style.display = 'none';
+            } else {
+              // No order found with either email or phone
+              orderStatus.style.display = 'none';
+              emptyState.style.display = 'block';
+              emptyState.querySelector('h3').textContent = 'Order Not Found';
+              emptyState.querySelector('p').textContent = 'No order found with the provided details. Please check your information and try again.';
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching order:', error);
+
+          // Hide loading state
+          document.getElementById('btn-text').style.display = 'inline';
+          document.getElementById('btn-spinner').style.display = 'none';
+          loadingState.style.display = 'none';
+
+          // Show error message
+          orderStatus.style.display = 'none';
+          emptyState.style.display = 'block';
+          emptyState.querySelector('h3').textContent = 'Error Fetching Order';
+          emptyState.querySelector('p').textContent = 'There was an error retrieving your order. Please try again later.';
+        }
+      }
+
+      // Display order details
+      function displayOrderDetails(order) {
+        const orderStatus = document.getElementById('order-status');
+
+        // Format the order date
+        const orderDate = order.orderDate ?
+          new Date(order.orderDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }) :
+          'Date not available';
+
+        // Handle discount value (NaN case)
+        const discount = isNaN(order.discount) ? 0 : order.discount;
+
+        orderStatus.innerHTML = `
+          <div class="order-header">
+            <div>
+              <h2>Order #${order.id}</h2>
+              <p class="order-summary-status">
+                Status: <span class="status-badge ${getStatusClass(order.shipping.status)}">${order.shipping.status}</span>
+              </p>
+            </div>
+            <div class="order-meta">
+              <span class="order-date">Placed on ${orderDate}</span>
+              <span class="order-amount">Total: ₹${formatCurrency(order.totalAmount)}</span>
+            </div>
+          </div>
+          
+          <div class="additional-info">
+            <h3>Delivery Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <strong>Delivery Address</strong>
+                <p id="delivery-address">
+                  ${order.shipping.address.firstName} ${order.shipping.address.lastName}<br>
+                  ${order.shipping.address.address}<br>
+                  ${order.shipping.address.city}, ${order.shipping.address.state} ${order.shipping.address.zipCode}<br>
+                  ${order.shipping.address.phone}
+                </p>
+              </div>
+              <div class="info-item">
+                <strong>Shipping Method</strong>
+                <p id="shipping-method">${order.shipping.method}</p>
+                <p>Estimated Delivery: <span id="estimated-delivery">${order.shipping.estimatedDelivery}</span></p>
+              </div>
+              <div class="info-item">
+                <strong>Payment Method</strong>
+                <p id="payment-method">${order.payment.method}</p>
+                <p>Payment Status: <span class="payment-status">${order.payment.status}</span></p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="additional-info">
+            <h3>Order Status Timeline</h3>
+            <div class="timeline" id="status-timeline">
+              ${generateTimelineHTML(order.statusHistory)}
+            </div>
+          </div>
+          
+          <div class="order-actions" id="order-actions">
+            <button class="action-btn primary-action" id="contact-support">
+              <i class="fas fa-headset"></i> Contact Support
+            </button>
+            <button class="action-btn secondary-action" id="print-invoice">
+              <i class="fas fa-print"></i> Print Invoice
+            </button>
+            ${order.shipping.status === 'Processing' ? `
+            <button class="action-btn danger-action" id="cancel-order">
+              <i class="fas fa-times-circle"></i> Cancel Order
+            </button>` : ''}
+            ${order.shipping.status === 'Delivered' ? `
+            <button class="action-btn secondary-action" id="reorder-btn">
+              <i class="fas fa-sync-alt"></i> Reorder
+            </button>` : ''}
+          </div>
+          
+          <div class="additional-info">
+            <h3>Order Items (${order.items.length})</h3>
+            <div class="order-items" id="order-items-container">
+              ${generateOrderItemsHTML(order.items)}
+            </div>
+            
+            <div class="order-summary">
+              <h3>Order Summary</h3>
+              <div class="order-summary-row">
+                <span>Subtotal (${order.items.reduce((sum, item) => sum + item.quantity, 0)} items):</span>
+                <span>₹${formatCurrency(order.subtotal)}</span>
+              </div>
+              <div class="order-summary-row">
+                <span>Shipping:</span>
+                <span>₹${formatCurrency(order.shipping.cost)}</span>
+              </div>
+              <div class="order-summary-row">
+                <span>Tax:</span>
+                <span>₹${formatCurrency(order.tax)}</span>
+              </div>
+              ${discount > 0 ? `
+              <div class="order-summary-row">
+                <span>Discount:</span>
+                <span>-₹${formatCurrency(discount)}</span>
+              </div>` : ''}
+              <div class="order-summary-row order-total">
+                <span>Total:</span>
+                <span>₹${formatCurrency(order.totalAmount)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Add event listeners to action buttons
+        document.getElementById('contact-support')?.addEventListener('click', () => {
+          alert('Redirecting to customer support...');
+        });
+
+        document.getElementById('print-invoice')?.addEventListener('click', () => {
+          window.print();
+        });
+
+        document.getElementById('cancel-order')?.addEventListener('click', () => {
+          if (confirm('Are you sure you want to cancel this order?')) {
+            alert('Order cancellation request submitted. You will receive confirmation shortly.');
+          }
+        });
+
+        document.getElementById('reorder-btn')?.addEventListener('click', () => {
+          // Add all items back to cart
+          const cart = JSON.parse(localStorage.getItem('cart')) || [];
+          order.items.forEach(item => {
+            const existingItem = cart.find(cartItem => cartItem.id === item.id);
+            if (existingItem) {
+              existingItem.quantity += item.quantity;
+            } else {
+              cart.push({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+                quantity: item.quantity
+              });
+            }
+          });
+          localStorage.setItem('cart', JSON.stringify(cart));
+          alert('All items from this order have been added to your cart.');
+          window.location.href = 'checkout.html';
+        });
+      }
+
+      function generateTimelineHTML(statusHistory) {
+        if (!statusHistory || !Array.isArray(statusHistory)) {
+          return '<p>No status history available.</p>';
+        }
+
+        return statusHistory.map(step => `
+          <div class="timeline-step ${step.status.toLowerCase()}">
+            <h4>
+              <span class="status-icon">${getStatusIcon(step.status)}</span>
+              ${step.title}
+            </h4>
+            <div class="status-details">
+              <span class="status-message">${step.message}</span>
+              <span class="status-time">${step.time}</span>
+            </div>
+            ${step.additionalInfo ? `<p class="status-message">${step.additionalInfo}</p>` : ''}
+          </div>
+        `).join('');
+      }
+
+      function generateOrderItemsHTML(items) {
+        if (!items || !Array.isArray(items)) {
+          return '<p>No items found in this order.</p>';
+        }
+
+        return items.map(item => `
+          <div class="order-item">
+            <img src="${item.image}" alt="${item.name}">
+            <div class="order-item-info">
+              <h4>${item.name}</h4>
+              <p>Quantity: ${item.quantity}</p>
+              <p>Price: ₹${formatCurrency(item.price)}</p>
+              <p class="return-eligible">Return eligible until ${getReturnDate()}</p>
+            </div>
+            <div class="order-item-actions">
+              <button class="action-btn secondary-action buy-again-btn" data-id="${item.id}">
+                <i class="fas fa-shopping-cart"></i> Buy Again
+              </button>
+              <button class="action-btn secondary-action return-btn" data-id="${item.id}">
+                <i class="fas fa-undo"></i> Return
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function getReturnDate() {
+        // Calculate return date (30 days from now)
+        const returnDate = new Date();
+        returnDate.setDate(returnDate.getDate() + 30);
+        return returnDate.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+
+      function getStatusClass(status) {
+        const statusMap = {
+          'Processing': 'processing',
+          'Shipped': 'shipped',
+          'Delivered': 'delivered',
+          'Cancelled': 'cancelled'
+        };
+        return statusMap[status] || 'processing';
+      }
+
+      function getStatusIcon(status) {
+        const iconMap = {
+          'Processing': '<i class="fas fa-clock"></i>',
+          'Shipped': '<i class="fas fa-shipping-fast"></i>',
+          'Delivered': '<i class="fas fa-check-circle"></i>',
+          'Cancelled': '<i class="fas fa-times-circle"></i>'
+        };
+        return iconMap[status] || '<i class="fas fa-clock"></i>';
+      }
+
+      function formatCurrency(amount) {
+        return amount.toFixed(2);
+      }
+    });
+  </script>
+</body>
+
+</html>

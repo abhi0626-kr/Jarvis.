@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electronics - Jarvis</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" type="image/png" href="top.jpg">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+  <!-- Your Firebase config -->
+  <script src="firebase-config.js"></script>
+
+  <style>
+    /* Base Styles */
+    :root {
+      --primary-color: #ff6b6b;
+      --secondary-color: #333;
+      --light-color: #f5f5f5;
+      --dark-color: #222;
+      --text-color: #333;
+      --text-light: #666;
+      --white: #fff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--light-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #ff5252;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Header Styles */
+    header {
+      background-color: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .top-bar {
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo h1 {
+      color: var(--primary-color);
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .search-bar {
+      display: flex;
+      margin: 0 20px;
+      flex-grow: 0.5;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px 0 0 4px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--primary-color);
+    }
+
+    .search-bar button {
+      padding: 10px 15px;
+      background-color: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-actions a {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .user-actions a:hover {
+      color: var(--primary-color);
+    }
+
+    .user-actions .cart {
+      position: relative;
+    }
+
+    .user-actions .cart #cart-count {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background-color: var(--primary-color);
+      color: var(--white);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      padding: 15px 0;
+    }
+
+    nav ul li {
+      margin-right: 100px;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: var(--secondary-color);
+      font-weight: 500;
+    }
+
+    nav ul li a:hover {
+      color: var(--primary-color);
+    }
+
+    /* Hero Section */
+    .hero {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+        url('https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: var(--white);
+      padding: 100px 0;
+      text-align: center;
+      height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero h2 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .hero p {
+      font-size: 24px;
+      margin-bottom: 30px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    .hero .btn {
+      animation: fadeIn 2s ease-in-out;
+      font-size: 18px;
+      padding: 12px 30px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Categories Section */
+    .categories {
+      padding: 50px 0;
+    }
+
+    .categories h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 32px;
+      color: var(--secondary-color);
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .category-card {
+      background-color: var(--white);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+    }
+
+    .category-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .category-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .category-card h3 {
+      padding: 15px;
+      text-align: center;
+    }
+
+    /* Products Section */
+    .featured-products,
+    .deals {
+      padding: 50px 0;
+    }
+
+    .featured-products h2,
+    .deals h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 32px;
+      color: var(--secondary-color);
+    }
+
+    .product-grid,
+    .deal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background-color: var(--white);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      transition: transform 0.3s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .product-card .badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: var(--primary-color);
+      color: var(--white);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .product-info {
+      padding: 15px;
+    }
+
+    .product-info h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .product-info .price {
+      font-weight: bold;
+      color: var(--primary-color);
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .product-info .original-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: 16px;
+      margin-left: 10px;
+    }
+
+    .product-info .discount {
+      color: #4caf50;
+      font-weight: bold;
+    }
+
+    .product-info .rating {
+      color: #ffc107;
+      margin-bottom: 10px;
+    }
+
+    .product-info .add-to-cart {
+      width: 100%;
+      padding: 8px;
+      background-color: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .product-info .add-to-cart:hover {
+      background-color: #ff5252;
+    }
+
+    /* Footer Styles */
+    footer {
+      background-color: var(--dark-color);
+      color: var(--white);
+      padding: 50px 0 0;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .footer-col h3 {
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .footer-col p,
+    .footer-col ul {
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 10px;
+    }
+
+    .footer-col ul li a {
+      color: #ddd;
+      text-decoration: none;
+    }
+
+    .footer-col ul li a:hover {
+      color: var(--primary-color);
+    }
+
+    .footer-col p i {
+      margin-right: 10px;
+      color: var(--primary-color);
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .social-icons a {
+      color: var(--white);
+      font-size: 20px;
+      transition: color 0.3s;
+    }
+
+    .social-icons a:hover {
+      color: var(--primary-color);
+    }
+
+    .copyright {
+      border-top: 1px solid #444;
+      padding: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .payment-methods i {
+      font-size: 24px;
+      margin-left: 15px;
+      color: #ddd;
+    }
+
+    /* Cart Sidebar */
+    .cart-sidebar {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 400px;
+      height: 100%;
+      background-color: var(--white);
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: right 0.3s;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .cart-sidebar.active {
+      right: 0;
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .close-cart {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .cart-items {
+      padding: 20px;
+    }
+
+    .cart-item {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+    }
+
+    .cart-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-info h4 {
+      margin-bottom: 5px;
+    }
+
+    .cart-item-info .price {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .cart-item-actions {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .cart-item-actions button {
+      background-color: #f5f5f5;
+      border: none;
+      width: 25px;
+      height: 25px;
+      cursor: pointer;
+    }
+
+    .cart-item-actions .quantity {
+      margin: 0 10px;
+    }
+
+    .remove-item {
+      color: var(--primary-color);
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .cart-total {
+      padding: 20px;
+      border-top: 1px solid #eee;
+      text-align: right;
+    }
+
+    .cart-total p {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    /* Cart Sync Styles */
+    .cart-sync {
+      padding: 15px;
+      border-top: 1px solid #eee;
+    }
+
+    .sync-btn {
+      width: 100%;
+      background-color: #4CAF50;
+    }
+
+    .sync-btn:hover {
+      background-color: #45a049;
+    }
+
+    .cart-sync-notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .cart-sync-notification.show {
+      opacity: 1;
+    }
+
+    .cart-sync-notification.error {
+      background-color: #ff6b6b;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+      .top-bar .container {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .logo,
+      .search-bar,
+      .user-actions {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .search-bar input {
+        width: 100%;
+      }
+
+      nav ul {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 10px;
+      }
+
+      .cart-sidebar {
+        width: 350px;
+      }
+
+      .hero {
+        height: 400px;
+      }
+
+      .hero h2 {
+        font-size: 36px;
+      }
+
+      .hero p {
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero h2 {
+        font-size: 32px;
+      }
+
+      .hero p {
+        font-size: 18px;
+      }
+
+      .cart-sidebar {
+        width: 100%;
+      }
+
+      nav ul li {
+        margin-right: 50px;
+      }
+    }
+
+    @media (max-width: 576px) {
+
+      .category-grid,
+      .product-grid,
+      .deal-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .copyright {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+      }
+
+      .hero {
+        height: 300px;
+        padding: 50px 0;
+      }
+
+      .hero h2 {
+        font-size: 28px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      nav ul li {
+        margin-right: 30px;
+      }
+    }
+
+
+    .logo h1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+
+    /* Mobile User Actions */
+    .user-actions .desktop-text {
+      display: inline;
+    }
+
+    .user-actions .mobile-icon {
+      display: none;
+      font-size: 20px;
+    }
+
+    /* Mobile Menu Styles */
+    .menu-toggle {
+      display: none;
+      cursor: pointer;
+      padding: 10px;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background-color: var(--secondary-color);
+      margin: 5px 0;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      width: 200px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .mobile-menu.active {
+      display: block;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 20px;
+      color: var(--secondary-color);
+      text-decoration: none;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-menu a:hover {
+      background-color: #f5f5f5;
+      color: var(--primary-color);
+    }
+
+    /* Active nav state */
+    nav ul li.active a {
+      color: var(--primary-color);
+      position: relative;
+    }
+
+    nav ul li.active a:after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary-color);
+    }
+
+    /* Loading and error states */
+    .loading,
+    .no-products,
+    .error,
+    .empty-cart {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 18px;
+      grid-column: 1 / -1;
+    }
+
+    /* Responsive User Actions */
+    @media (max-width: 768px) {
+      .user-actions .desktop-text {
+        display: none;
+      }
+
+      .user-actions .mobile-icon {
+        display: inline-block;
+      }
+
+      .user-actions a {
+        padding: 8px;
+        font-size: 18px;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      nav ul {
+        display: none;
+      }
+    }
+
+    /* Mobile User Actions */
+    .user-actions .desktop-text {
+      display: inline;
+    }
+
+    .user-actions .mobile-icon {
+      display: none;
+      font-size: 20px;
+    }
+
+    /* Mobile Menu Styles */
+    .menu-toggle {
+      display: none;
+      cursor: pointer;
+      padding: 10px;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background-color: var(--secondary-color);
+      margin: 5px 0;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background-color: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      width: 200px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .mobile-menu.active {
+      display: block;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 12px 20px;
+      color: var(--secondary-color);
+      text-decoration: none;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-menu a:hover {
+      background-color: #f5f5f5;
+      color: var(--primary-color);
+    }
+
+    /* Active nav state */
+    nav ul li.active a {
+      color: var(--primary-color);
+      position: relative;
+    }
+
+    nav ul li.active a:after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary-color);
+    }
+
+    /* Loading and error states */
+    .loading,
+    .no-products,
+    .error,
+    .empty-cart {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 18px;
+      grid-column: 1 / -1;
+    }
+
+    /* Responsive User Actions */
+    @media (max-width: 768px) {
+      .user-actions .desktop-text {
+        display: none;
+      }
+
+      .user-actions .mobile-icon {
+        display: inline-block;
+      }
+
+      .user-actions a {
+        padding: 8px;
+        font-size: 18px;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      nav ul {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav .container {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      nav ul {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        padding-bottom: 10px !important;
+      }
+
+      nav ul li {
+        margin-right: 30px !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Hide mobile menu elements since we don't need them */
+      .menu-toggle,
+      .mobile-menu {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="top-bar">
+      <div class="container">
+        <div class="logo">
+          <h1><img src="logo.jpg" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;"
+              alt="Jarvis Logo"> Jarvis</h1>
+        </div>
+        <!-- <div class="search-bar">
+          <input type="text" placeholder="Search for products...">
+          <button><i class="fas fa-search"></i></button>
+        </div> -->
+        <!-- <div class="user-actions">
+          <a href="profile.html"><i class="fas fa-user"></i> Account</a>
+          <a href="Customer.html"><i class="fas fa-heart"></i> Customer Service </a>
+          <a href="cart.html" class="cart"><i class="fas fa-shopping-cart"></i> Cart <span id="cart-count">0</span></a>
+        </div> -->
+
+        <div class="user-actions">
+          <a href="profile.html">
+            <i class="fas fa-user mobile-icon"></i>
+            <span class="desktop-text">My Account</span>
+          </a>
+          <a href="Customer.html">
+            <i class="fas fa-headset mobile-icon"></i>
+            <span class="desktop-text">Customer Service</span>
+          </a>
+          <a href="#" class="cart">
+            <i class="fas fa-shopping-cart mobile-icon"></i>
+            <span class="desktop-text">Cart</span>
+            <span id="cart-count">0</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+    <nav>
+      <div class="container">
+        <ul>
+          <li><a href="home.html">Home</a></li>
+          <li class="active"><a href="electronics.html">Electronics</a></li>
+          <li><a href="fashion.html">Fashion</a></li>
+          <li><a href="home-kitchen.html">Home & Kitchen</a></li>
+          <li><a href="groceries.html">Groceries</a></li>
+          <li><a href="beauty.html">Beauty</a></li>
+          <li><a href="offers.html">Offers</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h2>Electronics Collection</h2>
+          <p>Discover the latest gadgets and devices</p>
+          <a href="#featured-products"><button class="btn">Shop Now</button></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="featured-products" id="featured-products">
+      <div class="container">
+        <h2>Featured Electronics</h2>
+        <div class="product-grid" id="electronics-products">
+          <!-- Products will be loaded via JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <section class="categories">
+      <div class="container">
+        <h2>Electronics Categories</h2>
+        <div class="category-grid">
+          <div class="category-card">
+            <img
+              src="https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+              alt="Smartphones" loading="lazy">
+            <h3>Smartphones</h3>
+          </div>
+          <div class="category-card">
+            <img
+              src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+              alt="Laptops" loading="lazy">
+            <h3>Laptops</h3>
+          </div>
+          <div class="category-card">
+            <img
+              src="https://media.istockphoto.com/id/467946398/photo/contemporary-curved-led-smart-tv-design.jpg?s=1024x1024&w=is&k=20&c=MgYQDKxDej5LaetfICHX-L_8FrN__ud7Cia7baGthjo="
+              alt="Televisions" loading="lazy">
+            <h3>Televisions</h3>
+          </div>
+          <div class="category-card">
+            <img
+              src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+              alt="Audio Devices" loading="lazy">
+            <h3>Audio Devices</h3>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h3>About Jarvis</h3>
+          <p>Jarvis is India's fastest growing e-commerce platform, offering best prices and fastest delivery across the
+            country.</p>
+        </div>
+        <div class="footer-col">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="Customer.html">Contact</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms & Conditions</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Customer Service</h3>
+          <ul>
+            <li><a href="profile.html">My Account</a></li>
+            <li><a href="Tracking.html">Order Tracking</a></li>
+            <li><a href="profile.html">Wishlist</a></li>
+            <li><a href="Customer.html">Customer Service</a></li>
+            <li><a href="Tracking.html">Returns/Exchange</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Contact Us</h3>
+          <p><i class="fas fa-map-marker-alt"></i> 123 TPT, Tamilnadu, India</p>
+          <p><i class="fas fa-phone"></i> +91 6383221055</p>
+          <p><i class="fas fa-envelope"></i> spprtjarvis@gmail.com</p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="copyright">
+        <p>&copy; 2025 Jarvis E-commerce. All Rights Reserved.</p>
+        <div class="payment-methods">
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-cc-paypal"></i>
+          <i class="fab fa-cc-amazon-pay"></i>
+          <i class="fas fa-rupee-sign"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="close-cart" id="close-cart">&times;</button>
+    </div>
+    <!-- Add cart sync functionality -->
+    <div class="cart-sync">
+      <button id="sync-cart" class="btn sync-btn">
+        <i class="fas fa-sync-alt"></i> Sync Cart Across Devices
+      </button>
+    </div>
+    <div class="cart-sync-notification" id="cart-sync-notification">
+      Cart synchronized successfully!
+    </div>
+    <div class="cart-items" id="cart-items">
+      <!-- Cart items will be loaded via JavaScript -->
+    </div>
+    <!-- <div class="cart-total">
+      <p>Total: <span id="cart-total">₹0</span></p>
+      <a href="checkout.html"></a><button class="btn checkout-btn">Proceed to Checkout</button></a>
+    </div> -->
+    <div class="cart-total">
+      <p>Total: <span id="cart-total">₹0</span></p>
+      <a href="checkout.html"><button class="btn checkout-btn">Proceed to Checkout</button></a>
+    </div>
+  </div>
+
+  <script>
+    // Firebase initialization
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqXN_NjP3OUGhd-ah-hWTO66REtlMqwAk",
+      authDomain: "jarvis-e-commerce-a6563.firebaseapp.com",
+      projectId: "jarvis-e-commerce-a6563",
+      storageBucket: "jarvis-e-commerce-a6563.firebasestorage.app",
+      messagingSenderId: "998302088355",
+      appId: "1:998302088355:web:36279bf2694647baf05316",
+      measurementId: "G-Q9E7Z27L6K"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // DOM Elements
+    const electronicsProductsGrid = document.getElementById('electronics-products');
+    const cartCount = document.getElementById('cart-count');
+    const cartSidebar = document.getElementById('cart-sidebar');
+    const closeCartBtn = document.getElementById('close-cart');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    const cartLink = document.querySelector('.cart');
+    const syncCartBtn = document.getElementById('sync-cart');
+    const syncNotification = document.getElementById('cart-sync-notification');
+
+    // Global cart variable
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Load electronics products from Firebase
+    function loadElectronicsProducts() {
+      electronicsProductsGrid.innerHTML = '<p class="loading">Loading products...</p>';
+
+      db.collection("products")
+        .where("category", "==", "electronics")
+        .get()
+        .then((querySnapshot) => {
+          if (querySnapshot.empty) {
+            electronicsProductsGrid.innerHTML = '<p class="no-products">No electronics products found.</p>';
+            return;
+          }
+
+          electronicsProductsGrid.innerHTML = '';
+
+          querySnapshot.forEach((doc) => {
+            const product = { id: doc.id, ...doc.data() };
+            renderProductCard(product);
+          });
+        })
+        .catch((error) => {
+          console.error("Error loading electronics products: ", error);
+          electronicsProductsGrid.innerHTML = '<p class="error">Error loading products. Please try again later.</p>';
+        });
+    }
+
+    // Render product card
+    function renderProductCard(product) {
+      const discount = product.originalPrice
+        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+        : 0;
+
+      const productCard = document.createElement('div');
+      productCard.classList.add('product-card');
+      productCard.innerHTML = `
+    ${product.badge ? `<span class="badge">${product.badge}</span>` : ''}
+    <img src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x200?text=Product+Image'">
+    <div class="product-info">
+      <h3>${product.name}</h3>
+      <p style="color:#666; font-size:13px; margin-bottom:8px;">${product.description || ''}</p>
+      <div class="price">₹${product.price.toLocaleString('en-IN')}</div>
+      ${product.originalPrice ? `
+        <div>
+          <span class="original-price">₹${product.originalPrice.toLocaleString('en-IN')}</span>
+          <span class="discount">${discount}% off</span>
+        </div>
+      ` : ''}
+      <div class="rating">
+        ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5 - Math.floor(product.rating))}
+        (${product.rating})
+      </div>
+      <button class="add-to-cart"
+        data-id="${product.id}"
+        data-name="${product.name}"
+        data-price="${product.price}"
+        data-image="${product.image}">
+        Add to Cart
+      </button>
+    </div>
+  `;
+
+      // Add event listener to the add-to-cart button
+      const addToCartBtn = productCard.querySelector('.add-to-cart');
+      addToCartBtn.addEventListener('click', () => addToCart(product));
+
+      electronicsProductsGrid.appendChild(productCard);
+    }
+
+    // Add to cart function
+    function addToCart(product) {
+      // Check if product is already in cart
+      const existingItem = cart.find(item => item.id === product.id);
+
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          quantity: 1
+        });
+      }
+
+      // Save to localStorage
+      localStorage.setItem('cart', JSON.stringify(cart));
+
+      updateCart();
+      showCartNotification(product.name);
+
+      // Auto-save to Firebase if user is logged in
+      const user = firebase.auth().currentUser;
+      if (user) {
+        saveCartToFirebase();
+      }
+    }
+
+    // Update cart UI
+    function updateCart() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cartCount.textContent = cart.reduce((total, item) => total + item.quantity, 0);
+
+      cartItemsContainer.innerHTML = '';
+
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
+        cartTotal.textContent = '₹0';
+      } else {
+        let total = 0;
+
+        cart.forEach(item => {
+          const itemTotal = item.price * item.quantity;
+          total += itemTotal;
+
+          const cartItem = document.createElement('div');
+          cartItem.classList.add('cart-item');
+          cartItem.setAttribute('data-id', item.id);
+          cartItem.innerHTML = `
+        <img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/80x80?text=Product'">
+        <div class="cart-item-info">
+          <h4>${item.name}</h4>
+          <div class="price">₹${item.price.toLocaleString('en-IN')}</div>
+          <div class="cart-item-actions">
+            <button class="decrease-quantity">-</button>
+            <span class="quantity">${item.quantity}</span>
+            <button class="increase-quantity">+</button>
+            <button class="remove-item">Remove</button>
+          </div>
+        </div>
+      `;
+
+          cartItemsContainer.appendChild(cartItem);
+        });
+
+        // Add event listeners to quantity buttons
+        document.querySelectorAll('.increase-quantity').forEach(button => {
+          button.addEventListener('click', increaseQuantity);
+        });
+
+        document.querySelectorAll('.decrease-quantity').forEach(button => {
+          button.addEventListener('click', decreaseQuantity);
+        });
+
+        document.querySelectorAll('.remove-item').forEach(button => {
+          button.addEventListener('click', removeItem);
+        });
+
+        // Update total
+        cartTotal.textContent = `₹${total.toLocaleString('en-IN')}`;
+      }
+    }
+
+    // Quantity adjustment functions
+    function increaseQuantity(e) {
+      const itemId = e.target.closest('.cart-item').getAttribute('data-id');
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const item = cart.find(item => item.id === itemId);
+
+      if (item) {
+        item.quantity += 1;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCart();
+
+        // Auto-save to Firebase if user is logged in
+        const user = firebase.auth().currentUser;
+        if (user) {
+          saveCartToFirebase();
+        }
+      }
+    }
+
+    function decreaseQuantity(e) {
+      const itemId = e.target.closest('.cart-item').getAttribute('data-id');
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const item = cart.find(item => item.id === itemId);
+
+      if (item) {
+        if (item.quantity > 1) {
+          item.quantity -= 1;
+        } else {
+          cart = cart.filter(item => item.id !== itemId);
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCart();
+
+        // Auto-save to Firebase if user is logged in
+        const user = firebase.auth().currentUser;
+        if (user) {
+          saveCartToFirebase();
+        }
+      }
+    }
+
+    function removeItem(e) {
+      const itemId = e.target.closest('.cart-item').getAttribute('data-id');
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cart = cart.filter(item => item.id !== itemId);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCart();
+
+      // Auto-save to Firebase if user is logged in
+      const user = firebase.auth().currentUser;
+      if (user) {
+        saveCartToFirebase();
+      }
+    }
+
+    // Show cart notification
+    function showCartNotification(productName) {
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.innerHTML = `<p>${productName} added to cart!</p>`;
+
+      notification.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ff6b6b;
+    color: white;
+    padding: 15px;
+    border-radius: 4px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  `;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    // Toggle cart sidebar
+    cartLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      cartSidebar.classList.add('active');
+    });
+
+    closeCartBtn.addEventListener('click', () => {
+      cartSidebar.classList.remove('active');
+    });
+
+    // Close cart when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!cartSidebar.contains(e.target) && e.target !== cartLink && !cartLink.contains(e.target)) {
+        cartSidebar.classList.remove('active');
+      }
+    });
+
+    // Save cart to Firebase
+    async function saveCartToFirebase() {
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+          console.log("User not logged in, cart saved to localStorage only");
+          return false;
+        }
+
+        // Save cart to user's document in Firestore
+        await firebase.firestore().collection('users').doc(user.uid).set({
+          cart: cart,
+          lastUpdated: new Date()
+        }, { merge: true });
+
+        console.log("Cart saved to Firebase");
+        showSyncNotification('Cart synchronized successfully!');
+        return true;
+      } catch (error) {
+        console.error("Error saving cart to Firebase:", error);
+        showSyncNotification('Failed to sync cart. Please try again.', true);
+        return false;
+      }
+    }
+
+    // Load cart from Firebase
+    async function loadCartFromFirebase() {
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+          console.log("User not logged in, loading from localStorage");
+          cart = JSON.parse(localStorage.getItem('cart')) || [];
+          updateCart();
+          return;
+        }
+
+        // Get user's cart from Firestore
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+
+        if (userDoc.exists && userDoc.data().cart) {
+          cart = userDoc.data().cart;
+          console.log("Cart loaded from Firebase");
+
+          // Save to localStorage for consistency
+          localStorage.setItem('cart', JSON.stringify(cart));
+
+          updateCart();
+        } else {
+          // If no cart in Firebase, try loading from localStorage
+          const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+          if (localCart.length > 0) {
+            // Save localStorage cart to Firebase
+            cart = localCart;
+            await saveCartToFirebase();
+            updateCart();
+          } else {
+            cart = [];
+            updateCart();
+          }
+        }
+      } catch (error) {
+        console.error("Error loading cart from Firebase:", error);
+        // Fallback to localStorage
+        cart = JSON.parse(localStorage.getItem('cart')) || [];
+        updateCart();
+      }
+    }
+
+    // Show sync notification
+    function showSyncNotification(message, isError = false) {
+      syncNotification.textContent = message;
+      syncNotification.classList.remove('error');
+
+      if (isError) {
+        syncNotification.classList.add('error');
+      }
+
+      syncNotification.classList.add('show');
+
+      setTimeout(() => {
+        syncNotification.classList.remove('show');
+      }, 3000);
+    }
+
+    // Add event listener for sync button
+    if (syncCartBtn) {
+      syncCartBtn.addEventListener('click', async () => {
+        try {
+          const user = firebase.auth().currentUser;
+          if (!user) {
+            showSyncNotification('Please log in to sync your cart across devices', true);
+            return;
+          }
+
+          // Show loading state
+          syncCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+          syncCartBtn.disabled = true;
+
+          // Save cart to Firebase
+          const success = await saveCartToFirebase();
+
+          if (success) {
+            showSyncNotification('Cart synchronized across all your devices!');
+          } else {
+            showSyncNotification('Failed to sync cart. Please try again.', true);
+          }
+        } catch (error) {
+          console.error('Error syncing cart:', error);
+          showSyncNotification('Failed to sync cart. Please try again.', true);
+        } finally {
+          // Reset button state
+          syncCartBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Sync Cart Across Devices';
+          syncCartBtn.disabled = false;
+        }
+      });
+    }
+
+    // Remove automatic cart sync on login. Cart sync only happens when user clicks the sync button.
+
+    // Add some CSS for loading and error states
+    const style = document.createElement('style');
+    style.textContent = `
+  .loading, .no-products, .error, .empty-cart {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 18px;
+    grid-column: 1 / -1;
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+`;
+    document.head.appendChild(style);
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      loadElectronicsProducts();
+      // Always load from localStorage on page load
+      cart = JSON.parse(localStorage.getItem('cart')) || [];
+      updateCart();
+    });
+  </script>
+
+
+
+
+
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+
+  <!-- Your Firebase config -->
+  <script type="module" src="./firebase-config.js"></script>
+</body>
+
+</html>
